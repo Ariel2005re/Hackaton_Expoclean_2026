@@ -42,6 +42,7 @@ class AttributeProvenance(BaseModel):
     condition: AttributeCondition
     source_fragment: Optional[str] = None
     operation: Optional[str] = None
+    origin_values: Optional[Dict[str, Any]] = None
     conflicting_values: Optional[List[Any]] = None
 
 
@@ -59,7 +60,12 @@ class ProposedSpaceGroup(BaseModel):
     source_fragment: str = Field(description="Text snippet identifying the space")
     attributes: Dict[str, AttributeProvenance] = Field(default_factory=dict)
     is_revisable: bool = Field(default=True)
+    can_be_confirmed: bool = Field(
+        default=False,
+        description="Whether group has all mandatory attributes and no unresolved contradictions"
+    )
     warnings: List[str] = Field(default_factory=list)
+
 
 
 class DefectiveSpaceGroup(BaseModel):

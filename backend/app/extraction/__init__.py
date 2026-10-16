@@ -35,6 +35,13 @@ from backend.app.extraction.models import (
     ProposedSpaceGroup,
     TextValidationResult,
 )
+from backend.app.extraction.provenance import (
+    build_contradictory_provenance,
+    check_group_confirmation_eligibility,
+    derive_total_area,
+    derive_unit_area,
+    resolve_contradiction,
+)
 from backend.app.extraction.validator import (
     MAX_UNICODE_CODE_POINTS,
     count_unicode_code_points,
@@ -66,6 +73,11 @@ __all__ = [
     "ExtractionAnalysisResult",
     "validate_proposed_group",
     "parse_extraction_response",
+    "derive_unit_area",
+    "derive_total_area",
+    "build_contradictory_provenance",
+    "check_group_confirmation_eligibility",
+    "resolve_contradiction",
     "MAX_UNICODE_CODE_POINTS",
     "count_unicode_code_points",
     "validate_confirmed_text",

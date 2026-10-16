@@ -117,17 +117,17 @@ def validate_proposed_group(
             condition=AttributeCondition.EXPLICIT,
             source_fragment=source_fragment,
         )
+        if total_area is None and quantity is not None and quantity > 0:
+            from backend.app.extraction.provenance import derive_total_area
+            total_area, total_prov = derive_total_area(name, unit_area, quantity, source_fragment)
+            attributes["total_area_m2"] = total_prov
+            warnings.append(f"Superficie total derivada: {total_prov.operation}.")
     elif total_area is not None and quantity is not None and quantity > 0:
-        # Derivation: e.g. 280 m² ÷ 8 oficinas = 35 m² por unidad
-        unit_area = round(total_area / quantity, 2)
-        operation = f"{total_area:g} m² ÷ {quantity} {name} = {unit_area:g} m² por unidad"
-        attributes["unit_area_m2"] = AttributeProvenance(
-            value=unit_area,
-            condition=AttributeCondition.DERIVED,
-            source_fragment=source_fragment,
-            operation=operation,
-        )
-        warnings.append(f"Superficie por unidad derivada: {operation}.")
+        # Derivation: e.g. 280 m² ÷ 8 oficinas = 35 m² por unidad (RF-07)
+        from backend.app.extraction.provenance import derive_unit_area
+        unit_area, unit_prov = derive_unit_area(name, total_area, quantity, source_fragment)
+        attributes["unit_area_m2"] = unit_prov
+        warnings.append(f"Superficie por unidad derivada: {unit_prov.operation}.")
     else:
         attributes["unit_area_m2"] = AttributeProvenance(
             value=None,
@@ -135,7 +135,7 @@ def validate_proposed_group(
         )
         warnings.append("Superficie no especificada en el texto; pendiente de completar.")
 
-    if total_area is not None:
+    if total_area is not None and "total_area_m2" not in attributes:
         attributes["total_area_m2"] = AttributeProvenance(
             value=total_area,
             condition=AttributeCondition.EXPLICIT,
@@ -147,11 +147,10 @@ def validate_proposed_group(
     conflicting_conds = raw_group.get("conflicting_conditions")
     if conflicting_conds and len(conflicting_conds) > 1:
         # Contradiction detected (RF-08)
-        attributes["condition"] = AttributeProvenance(
-            value=None,
-            condition=AttributeCondition.CONTRADICTORY,
-            source_fragment=source_fragment,
+        from backend.app.extraction.provenance import build_contradictory_provenance
+        attributes["condition"] = build_contradictory_provenance(
             conflicting_values=conflicting_conds,
+            source_fragment=source_fragment,
         )
         warnings.append(
             f"Conflicto de estado detectado ({', '.join(str(c) for c in conflicting_conds)}). "
@@ -230,8 +229,14 @@ def validate_proposed_group(
         source_fragment=source_fragment,
         attributes=attributes,
         is_revisable=True,
+        can_be_confirmed=False,
         warnings=warnings,
     )
+
+    from backend.app.extraction.provenance import check_group_confirmation_eligibility
+    can_confirm, _ = check_group_confirmation_eligibility(proposal)
+    proposal.can_be_confirmed = can_confirm
+
     return proposal, None
 
 
