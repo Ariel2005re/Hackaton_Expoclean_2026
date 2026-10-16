@@ -1,5 +1,6 @@
 """E01: commercial PDF composition from a fixed quotation snapshot."""
 
+from dataclasses import replace
 from decimal import Decimal
 from io import BytesIO
 import unittest
@@ -84,6 +85,37 @@ class QuotePdfCompositionTests(unittest.TestCase):
         ):
             with self.subTest(value=value):
                 self.assertIn(value, text)
+
+    def test_internal_salary_unit_cost_and_margin_never_reach_pdf(self):
+        """E02 / RF-21, RF-24: only commercial fields cross the PDF boundary."""
+        with_private_values = replace(
+            self.snapshot,
+            internal_calculation={
+                "Salario general": "USD 7.13",
+                "Salario especializado": "USD 11.29",
+                "Costo unitario de insumo": "USD 2.17",
+                "Margen": "37.5%",
+            },
+        )
+        public_reader = PdfReader(BytesIO(compose_quote_pdf(self.snapshot)))
+        private_reader = PdfReader(BytesIO(compose_quote_pdf(with_private_values)))
+        public_text = "\n".join(page.extract_text() for page in public_reader.pages)
+        private_text = "\n".join(page.extract_text() for page in private_reader.pages)
+        metadata = " ".join(str(value) for value in private_reader.metadata.values())
+
+        self.assertEqual(public_text, private_text)
+        for private_value in (
+            "Salario general",
+            "Salario especializado",
+            "Costo unitario de insumo",
+            "Margen",
+            "USD 7.13",
+            "USD 11.29",
+            "USD 2.17",
+            "37.5%",
+        ):
+            with self.subTest(private_value=private_value):
+                self.assertNotIn(private_value, private_text + metadata)
 
 
 if __name__ == "__main__":

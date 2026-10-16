@@ -125,7 +125,7 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 - [x] **E01 · 25 min · Dep.: G02 · RF-02–RF-03, RF-24.** Crear composición de PDF desde una instantánea de ejemplo con cliente, dirección, alcance, calendario, período y totales.
   **Hecho cuando:** el PDF se abre y el texto extraído contiene los campos comerciales requeridos.
-- [ ] **E02 · 20 min · Dep.: E01 · RF-21, RF-24.** Excluir salarios, costos unitarios internos y margen del documento.
+- [x] **E02 · 20 min · Dep.: E01 · RF-21, RF-24.** Excluir salarios, costos unitarios internos y margen del documento.
   **Hecho cuando:** una prueba de contenido no encuentra esos valores ni etiquetas en el PDF.
 - [ ] **E03 · 25 min · Dep.: A02, E01 · RF-25, RF-34.** Definir instantánea de datos visibles y valores de precio, excluyendo código/fecha de la comparación de equivalencia.
   **Hecho cuando:** dos entradas equivalentes dan la misma identidad y un cambio visible o de precio da otra.

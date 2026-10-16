@@ -4,10 +4,11 @@ The caller supplies already calculated dates and amounts. Validation, pricing,
 version identity, and persistence belong to later tasks.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from html import escape
 from io import BytesIO
+from typing import Mapping
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
@@ -43,6 +44,9 @@ class QuotePdfSnapshot:
     subtotal: Decimal
     tax: Decimal
     total: Decimal
+    # RF-21 values may accompany the snapshot for internal review. The PDF
+    # renderer below selects commercial fields explicitly and never reads this.
+    internal_calculation: Mapping[str, str] = field(default_factory=dict, repr=False)
 
 
 _INK = colors.HexColor("#172B3A")
