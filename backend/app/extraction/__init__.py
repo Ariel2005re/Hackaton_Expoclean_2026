@@ -22,8 +22,17 @@ from backend.app.extraction.exceptions import (
     UnicodeLimitExceededError,
     Utf8DecodeError,
 )
+from backend.app.extraction.group_validator import (
+    parse_extraction_response,
+    validate_proposed_group,
+)
 from backend.app.extraction.models import (
+    AttributeCondition,
+    AttributeProvenance,
+    DefectiveSpaceGroup,
+    ExtractionAnalysisResult,
     ExtractionInputRequest,
+    ProposedSpaceGroup,
     TextValidationResult,
 )
 from backend.app.extraction.validator import (
@@ -50,6 +59,13 @@ __all__ = [
     "Utf8DecodeError",
     "ExtractionInputRequest",
     "TextValidationResult",
+    "AttributeCondition",
+    "AttributeProvenance",
+    "ProposedSpaceGroup",
+    "DefectiveSpaceGroup",
+    "ExtractionAnalysisResult",
+    "validate_proposed_group",
+    "parse_extraction_response",
     "MAX_UNICODE_CODE_POINTS",
     "count_unicode_code_points",
     "validate_confirmed_text",
