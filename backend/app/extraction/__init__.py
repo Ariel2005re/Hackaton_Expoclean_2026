@@ -35,6 +35,7 @@ from backend.app.extraction.models import (
     ProposedSpaceGroup,
     TextValidationResult,
 )
+from backend.app.extraction.proposal_manager import ProposalReviewSession
 from backend.app.extraction.provenance import (
     build_contradictory_provenance,
     check_group_confirmation_eligibility,
@@ -78,6 +79,7 @@ __all__ = [
     "build_contradictory_provenance",
     "check_group_confirmation_eligibility",
     "resolve_contradiction",
+    "ProposalReviewSession",
     "MAX_UNICODE_CODE_POINTS",
     "count_unicode_code_points",
     "validate_confirmed_text",
