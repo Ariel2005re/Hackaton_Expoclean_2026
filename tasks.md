@@ -129,7 +129,7 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
   **Hecho cuando:** una prueba de contenido no encuentra esos valores ni etiquetas en el PDF.
 - [x] **E03 · 25 min · Dep.: A02, E01 · RF-25, RF-34.** Definir instantánea de datos visibles y valores de precio, excluyendo código/fecha de la comparación de equivalencia.
   **Hecho cuando:** dos entradas equivalentes dan la misma identidad y un cambio visible o de precio da otra.
-- [ ] **E04 · 25 min · Dep.: E03 · RF-25–RF-27, RF-34.** Preparar servicio de emisión que conserve PDF e instantánea juntos o no cree versión ante fallo.
+- [x] **E04 · 25 min · Dep.: E03 · RF-25–RF-27, RF-34.** Preparar servicio de emisión que conserve PDF e instantánea juntos o no cree versión ante fallo.
   **Hecho cuando:** pruebas con almacenamiento simulado cubren éxito, fallo de PDF y fallo de persistencia sin versión parcial.
 - [ ] **E05 · 25 min · Dep.: E03–E04 · RF-25, RF-27, RF-34.** Reutilizar versión anterior tras clic repetido o cambios revertidos y crear otra tras cambio relevante.
   **Hecho cuando:** las pruebas conservan código, fecha y PDF del reintento y distinguen una nueva versión válida.

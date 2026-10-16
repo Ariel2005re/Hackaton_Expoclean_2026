@@ -43,6 +43,20 @@ class VisibleQuote:
             total=quote.total,
         )
 
+    def to_pdf_snapshot(self) -> QuotePdfSnapshot:
+        """Pass only customer-facing values to the PDF composer."""
+        return QuotePdfSnapshot(
+            company=self.company,
+            client=self.client,
+            service_address=self.service_address,
+            scope=self.scope,
+            period=self.period,
+            groups=self.groups,
+            subtotal=self.subtotal,
+            tax=self.tax,
+            total=self.total,
+        )
+
 
 def _decimal_text(value: Decimal) -> str:
     if not isinstance(value, Decimal):
