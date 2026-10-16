@@ -27,12 +27,19 @@ from backend.app.extraction.group_validator import (
     validate_proposed_group,
 )
 from backend.app.extraction.models import (
+    AnalysisStatus,
     AttributeCondition,
     AttributeProvenance,
+    ConfirmGroupRequest,
+    CorrectAttributeRequest,
     DefectiveSpaceGroup,
+    DiscardGroupRequest,
     ExtractionAnalysisResult,
     ExtractionInputRequest,
+    ExtractionServiceResponse,
+    MergeGroupsRequest,
     ProposedSpaceGroup,
+    SplitGroupRequest,
     TextValidationResult,
 )
 from backend.app.extraction.proposal_manager import ProposalReviewSession
@@ -43,6 +50,8 @@ from backend.app.extraction.provenance import (
     derive_unit_area,
     resolve_contradiction,
 )
+from backend.app.extraction.router import extraction_router, get_extraction_service
+from backend.app.extraction.service import ExtractionService
 from backend.app.extraction.validator import (
     MAX_UNICODE_CODE_POINTS,
     count_unicode_code_points,
@@ -72,6 +81,13 @@ __all__ = [
     "ProposedSpaceGroup",
     "DefectiveSpaceGroup",
     "ExtractionAnalysisResult",
+    "AnalysisStatus",
+    "ExtractionServiceResponse",
+    "CorrectAttributeRequest",
+    "MergeGroupsRequest",
+    "SplitGroupRequest",
+    "DiscardGroupRequest",
+    "ConfirmGroupRequest",
     "validate_proposed_group",
     "parse_extraction_response",
     "derive_unit_area",
@@ -80,6 +96,9 @@ __all__ = [
     "check_group_confirmation_eligibility",
     "resolve_contradiction",
     "ProposalReviewSession",
+    "ExtractionService",
+    "extraction_router",
+    "get_extraction_service",
     "MAX_UNICODE_CODE_POINTS",
     "count_unicode_code_points",
     "validate_confirmed_text",
