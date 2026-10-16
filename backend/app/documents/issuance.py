@@ -14,12 +14,13 @@ from .identity import VersionSnapshot
 
 @dataclass(frozen=True)
 class EmittedVersion:
+    quote_id: str
     snapshot: VersionSnapshot
     pdf: bytes
 
 
 class VersionTransaction(Protocol):
-    def stage(self, snapshot: VersionSnapshot, pdf: bytes) -> None: ...
+    def stage(self, quote_id: str, snapshot: VersionSnapshot, pdf: bytes) -> None: ...
 
     def commit(self) -> EmittedVersion: ...
 
@@ -27,6 +28,8 @@ class VersionTransaction(Protocol):
 
 
 class VersionStore(Protocol):
+    def find_by_identity(self, quote_id: str, identity: str) -> EmittedVersion | None: ...
+
     def begin(self) -> VersionTransaction: ...
 
 
@@ -39,15 +42,22 @@ class EmissionService:
         self._store = store
         self._render_pdf = render_pdf
 
-    def emit(self, snapshot: VersionSnapshot) -> EmittedVersion:
-        """Persist a complete version or leave the draft with no new version."""
+    def emit(self, snapshot: VersionSnapshot, *, quote_id: str) -> EmittedVersion:
+        """Reuse equivalent history or persist a complete new version."""
+        if not quote_id:
+            raise ValueError("La cotización requiere un identificador")
+
+        existing = self._store.find_by_identity(quote_id, snapshot.identity)
+        if existing is not None:
+            return existing
+
         pdf = self._render_pdf(snapshot.visible.to_pdf_snapshot())
         if not isinstance(pdf, bytes) or not pdf.startswith(b"%PDF-"):
             raise ValueError("La generación no devolvió un PDF válido")
 
         transaction = self._store.begin()
         try:
-            transaction.stage(snapshot, pdf)
+            transaction.stage(quote_id, snapshot, pdf)
             return transaction.commit()
         except Exception:
             transaction.rollback()

@@ -131,7 +131,7 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
   **Hecho cuando:** dos entradas equivalentes dan la misma identidad y un cambio visible o de precio da otra.
 - [x] **E04 · 25 min · Dep.: E03 · RF-25–RF-27, RF-34.** Preparar servicio de emisión que conserve PDF e instantánea juntos o no cree versión ante fallo.
   **Hecho cuando:** pruebas con almacenamiento simulado cubren éxito, fallo de PDF y fallo de persistencia sin versión parcial.
-- [ ] **E05 · 25 min · Dep.: E03–E04 · RF-25, RF-27, RF-34.** Reutilizar versión anterior tras clic repetido o cambios revertidos y crear otra tras cambio relevante.
+- [x] **E05 · 25 min · Dep.: E03–E04 · RF-25, RF-27, RF-34.** Reutilizar versión anterior tras clic repetido o cambios revertidos y crear otra tras cambio relevante.
   **Hecho cuando:** las pruebas conservan código, fecha y PDF del reintento y distinguen una nueva versión válida.
 - [ ] **E06 · 25 min · Dep.: E04 · RF-27–RF-28.** Preparar búsqueda por código/cliente/servicio y descarga del PDF conservado, sin recálculo.
   **Hecho cuando:** una versión previa se encuentra y descarga aun si la configuración actual cambió.
