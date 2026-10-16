@@ -127,7 +127,7 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
   **Hecho cuando:** el PDF se abre y el texto extraído contiene los campos comerciales requeridos.
 - [x] **E02 · 20 min · Dep.: E01 · RF-21, RF-24.** Excluir salarios, costos unitarios internos y margen del documento.
   **Hecho cuando:** una prueba de contenido no encuentra esos valores ni etiquetas en el PDF.
-- [ ] **E03 · 25 min · Dep.: A02, E01 · RF-25, RF-34.** Definir instantánea de datos visibles y valores de precio, excluyendo código/fecha de la comparación de equivalencia.
+- [x] **E03 · 25 min · Dep.: A02, E01 · RF-25, RF-34.** Definir instantánea de datos visibles y valores de precio, excluyendo código/fecha de la comparación de equivalencia.
   **Hecho cuando:** dos entradas equivalentes dan la misma identidad y un cambio visible o de precio da otra.
 - [ ] **E04 · 25 min · Dep.: E03 · RF-25–RF-27, RF-34.** Preparar servicio de emisión que conserve PDF e instantánea juntos o no cree versión ante fallo.
   **Hecho cuando:** pruebas con almacenamiento simulado cubren éxito, fallo de PDF y fallo de persistencia sin versión parcial.
