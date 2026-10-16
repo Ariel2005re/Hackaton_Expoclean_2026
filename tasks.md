@@ -121,7 +121,7 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 **Rama:** `feature/mvp-pdf-history`. **Propiedad:** `backend/app/documents/` y sus pruebas. Usa una vista previa fija y un doble de almacenamiento hasta integrar P1 y P2. **Revisor:** P4.
 
-- [ ] **E01 · 25 min · Dep.: G02 · RF-02–RF-03, RF-24.** Crear composición de PDF desde una instantánea de ejemplo con cliente, dirección, alcance, calendario, período y totales.
+- [x] **E01 · 25 min · Dep.: G02 · RF-02–RF-03, RF-24.** Crear composición de PDF desde una instantánea de ejemplo con cliente, dirección, alcance, calendario, período y totales.
   **Hecho cuando:** el PDF se abre y el texto extraído contiene los campos comerciales requeridos.
 - [ ] **E02 · 20 min · Dep.: E01 · RF-21, RF-24.** Excluir salarios, costos unitarios internos y margen del documento.
   **Hecho cuando:** una prueba de contenido no encuentra esos valores ni etiquetas en el PDF.
