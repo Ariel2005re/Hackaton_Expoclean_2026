@@ -133,9 +133,9 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
   **Hecho cuando:** pruebas con almacenamiento simulado cubren éxito, fallo de PDF y fallo de persistencia sin versión parcial.
 - [x] **E05 · 25 min · Dep.: E03–E04 · RF-25, RF-27, RF-34.** Reutilizar versión anterior tras clic repetido o cambios revertidos y crear otra tras cambio relevante.
   **Hecho cuando:** las pruebas conservan código, fecha y PDF del reintento y distinguen una nueva versión válida.
-- [ ] **E06 · 25 min · Dep.: E04 · RF-27–RF-28.** Preparar búsqueda por código/cliente/servicio y descarga del PDF conservado, sin recálculo.
+- [x] **E06 · 25 min · Dep.: E04 · RF-27–RF-28.** Preparar búsqueda por código/cliente/servicio y descarga del PDF conservado, sin recálculo.
   **Hecho cuando:** una versión previa se encuentra y descarga aun si la configuración actual cambió.
-- [ ] **E07 · 25 min · Dep.: E02, E05–E06 · RF-24–RF-28, RF-34.** Probar privacidad del PDF, inmutabilidad, fallos, búsqueda e idempotencia con instantáneas controladas.
+- [x] **E07 · 25 min · Dep.: E02, E05–E06 · RF-24–RF-28, RF-34.** Probar privacidad del PDF, inmutabilidad, fallos, búsqueda e idempotencia con instantáneas controladas.
   **Hecho cuando:** todas las variantes tienen resultado esperado independiente del PDF o versión generados.
 - [ ] **E08 · 20 min · Dep.: E07 · RF-24–RF-28, RF-34.** Ejecutar pruebas de la rama, registrar RF cubiertos y solicitar revisión a P4.
   **Hecho cuando:** resultados reproducibles y revisión de P4 quedan registrados.
