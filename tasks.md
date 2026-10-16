@@ -4,7 +4,7 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 ## Trabajo compartido y reglas de ramas
 
-- **Precondición:** esta carpeta todavía no aparece como checkout de Git. Antes de crear ramas, comprobar el repositorio remoto compartido, una rama base común y que este tablero esté disponible en ella. Nadie debe inicializar un repositorio distinto por su cuenta.
+- **Precondición verificada en G01:** esta carpeta es un checkout de Git de `Ariel2005re/Hackaton_Expoclean_2026`; `main` y `origin/main` coincidieron en el commit base indicado abajo. Nadie debe inicializar un repositorio distinto por su cuenta.
 - Cada persona crea su rama desde el **mismo commit base**. Una persona modifica solo sus rutas asignadas y pruebas correspondientes. Los cambios al archivo de arranque de FastAPI, registro global de rutas y migraciones compartidas pertenecen a P1 durante integración.
 - Las cinco ramas se desarrollan en paralelo. Las dependencias marcadas «integración» se satisfacen en la rama `integration/mvp` después de aprobar las pruebas de cada rama; las demás dependencias se resuelven dentro de la rama de su dueño.
 - Contrato de integración: un **borrador** admite campos vacíos; un **grupo** tiene sus trabajos y recursos; una **vista previa** devuelve calendario, horas, líneas monetarias y pendientes; una **propuesta IA** conserva valor, estado y fragmento por atributo; una **versión** devuelve metadatos y PDF inmutables. P1 comparte el documento de A02 mediante una revisión visible para las otras cuatro ramas antes de que sus adaptadores dependan de él; no hace falta fusionar código antes del cierre. Las reglas de negocio siguen la spec.
@@ -12,10 +12,12 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 ### Puerta inicial — P1
 
-- [ ] **G01 · 15 min · Dep.: ninguna · RF-01–RF-34.** Verificar checkout, remoto, rama base y commit de partida común; compartirlos con las cinco personas.
+- [x] **G01 · 15 min · Dep.: ninguna · RF-01–RF-34.** Verificar checkout, remoto, rama base y commit de partida común; compartirlos con las cinco personas.
   **Hecho cuando:** `git rev-parse`, rama y remoto identifican el mismo repositorio compartido y todos conocen el commit base.
-- [ ] **G02 · 15 min · Dep.: G01 · RF-01–RF-34.** Publicar este tablero y acordar las cinco ramas y las rutas de propiedad antes de empezar la implementación.
+  **Referencia común para P1–P5:** repositorio `https://github.com/Ariel2005re/Hackaton_Expoclean_2026.git`; rama base `main`; commit de partida `63a1025231c004a07a22f03378bfd4590d7a64b1`. El checkout local, `origin/main` y la rama `main` del remoto coincidieron en ese commit al verificar G01.
+- [x] **G02 · 15 min · Dep.: G01 · RF-01–RF-34.** Publicar este tablero y acordar las cinco ramas y las rutas de propiedad antes de empezar la implementación.
   **Hecho cuando:** las cinco personas confirman por escrito rama, rutas asignadas y dependencias; no hay dos dueños de un mismo archivo.
+  **Asignación publicada:** P1 `feature/mvp-data-api` (Docker, datos, modelos, migraciones y rutas compartidas); P2 `feature/mvp-estimation` (`backend/app/estimation/`); P3 `feature/mvp-gemini` (`backend/app/extraction/`); P4 `feature/mvp-web` (`frontend/`); P5 `feature/mvp-pdf-history` (`backend/app/documents/`). Cada persona posee las pruebas de sus rutas. El inicio depende de G02 y los adaptadores del contrato A02 según cada tarea. Las confirmaciones individuales se incorporarán cuando el usuario las comparta por escrito.
 
 ## P1 — datos, configuración y API de borradores
 
