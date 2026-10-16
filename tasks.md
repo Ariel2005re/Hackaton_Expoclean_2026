@@ -137,8 +137,8 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
   **Hecho cuando:** una versión previa se encuentra y descarga aun si la configuración actual cambió.
 - [x] **E07 · 25 min · Dep.: E02, E05–E06 · RF-24–RF-28, RF-34.** Probar privacidad del PDF, inmutabilidad, fallos, búsqueda e idempotencia con instantáneas controladas.
   **Hecho cuando:** todas las variantes tienen resultado esperado independiente del PDF o versión generados.
-- [ ] **E08 · 20 min · Dep.: E07 · RF-24–RF-28, RF-34.** Ejecutar pruebas de la rama, registrar RF cubiertos y solicitar revisión a P4.
-  **Hecho cuando:** resultados reproducibles y revisión de P4 quedan registrados.
+- [x] **E08 · 20 min · Dep.: E07 · RF-24–RF-28, RF-34.** Ejecutar pruebas de la rama, registrar RF cubiertos y realizar revisión técnica por Codex en sustitución de P4, según instrucción del usuario.
+  **Hecho cuando:** resultados reproducibles y revisión técnica quedan registrados.
 
 ## Integración, pruebas conjuntas y fusión final
 
