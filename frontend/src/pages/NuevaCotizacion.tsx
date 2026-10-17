@@ -57,6 +57,9 @@ export default function NuevaCotizacion() {
     setSelected([]);
     setPreview(null);
     setLatestVersion(null);
+    setVersions([]);
+    setNotice("");
+    setSplitting(null);
     try {
       setText(localStorage.getItem(`mvp-web-text-${id ?? "new"}`) ?? "");
     } catch {
@@ -83,7 +86,11 @@ export default function NuevaCotizacion() {
           if (active) {
             setDraft(d);
             setProposal(current);
-            if (current) setText(current.review.original_text);
+            if (current) {
+              let cached: string | null = null;
+              try { cached = localStorage.getItem(`mvp-web-text-${id}`); } catch { /* optional storage */ }
+              setText(cached ?? current.review.original_text);
+            }
             setLoaded(true);
           }
         })
@@ -285,6 +292,7 @@ export default function NuevaCotizacion() {
       setBusy(true);
       const saved = await save(draft, false);
       if (!saved) return;
+      setNotice("Analizando descripción con Gemini…");
       const result = await api.analyze(saved.id!, text);
       setProposal(result);
       setSelected([]);

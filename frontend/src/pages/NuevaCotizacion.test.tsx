@@ -17,6 +17,7 @@ import {
   type VistaPrevia,
 } from "../types/borrador";
 import NuevaCotizacion from "./NuevaCotizacion";
+import App from "../App";
 
 const draft = { ...nuevoBorrador(), id: "q1" };
 const invalid: VistaPrevia = {
@@ -59,6 +60,14 @@ afterEach(() => {
 });
 
 describe("flujo manual D11", () => {
+  it("al empezar otra cotización no muestra versiones de la anterior", async () => {
+    vi.mocked(api.history).mockResolvedValue([{ quote_id: "q1", code: "ANTERIOR", issued_at: "2026-10-17", client: "Anterior", service_address: "Quito", scope: "Oficinas", total: "10.00" }]);
+    render(<MemoryRouter initialEntries={["/borradores/q1"]}><App /></MemoryRouter>);
+    await screen.findByText(/ANTERIOR/);
+    fireEvent.click(screen.getByRole("link", { name: "Nueva cotización" }));
+    await screen.findByRole("heading", { name: "Nueva cotización" });
+    expect(screen.queryByText(/ANTERIOR/)).not.toBeInTheDocument();
+  });
   it("bloquea emisión con pendientes y permite descargar tras una vista previa válida", async () => {
     const preview = vi.mocked(api.preview);
     const issue = vi.spyOn(api, "issue").mockResolvedValue({
