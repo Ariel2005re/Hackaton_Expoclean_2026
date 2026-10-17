@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from app.routers import config, clientes
 from app.routers import config, clientes, cotizaciones
 
 app = FastAPI(title="API Hackathon Expo Clean 2026")
