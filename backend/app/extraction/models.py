@@ -1,7 +1,7 @@
 """Data models for text extraction input, proposal validation, and attribute provenance (RF-06, RF-07, RF-08, RF-09, RF-29, RF-30, RF-31)."""
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field
 
 
@@ -143,4 +143,38 @@ class DiscardGroupRequest(BaseModel):
 
 class ConfirmGroupRequest(BaseModel):
     group_id: str
+
+
+class ReviewSessionState(BaseModel):
+    """Review state supplied by the caller until draft persistence is integrated."""
+    original_text: str = ""
+    revisable_groups: List[ProposedSpaceGroup] = Field(default_factory=list)
+    defective_groups: List[DefectiveSpaceGroup] = Field(default_factory=list)
+    confirmed_groups: List[ProposedSpaceGroup] = Field(default_factory=list)
+    discarded_groups: List[ProposedSpaceGroup] = Field(default_factory=list)
+
+
+class CorrectReviewPayload(BaseModel):
+    session: ReviewSessionState
+    action: CorrectAttributeRequest
+
+
+class MergeReviewPayload(BaseModel):
+    session: ReviewSessionState
+    action: MergeGroupsRequest
+
+
+class SplitReviewPayload(BaseModel):
+    session: ReviewSessionState
+    action: SplitGroupRequest
+
+
+class DiscardReviewPayload(BaseModel):
+    session: ReviewSessionState
+    action: DiscardGroupRequest
+
+
+class ConfirmReviewPayload(BaseModel):
+    session: ReviewSessionState
+    action: ConfirmGroupRequest
 

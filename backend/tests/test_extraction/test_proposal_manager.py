@@ -52,8 +52,8 @@ class TestMergeGroups:
     """Verifies that merging groups preserves attribute provenance from both parents (RF-09)."""
 
     def test_merge_two_compatible_office_groups(self):
-        g1 = create_sample_group("oficinas piso 1", 4, 35.0, "4 oficinas en piso 1")
-        g2 = create_sample_group("oficinas piso 2", 4, 35.0, "4 oficinas en piso 2")
+        g1 = create_sample_group("oficinas piso 1", 4, 35.0, "4 oficinas en piso 1 de 35 m²")
+        g2 = create_sample_group("oficinas piso 2", 4, 35.0, "4 oficinas en piso 2 de 35 m²")
         session = ProposalReviewSession(revisable_groups=[g1, g2])
 
         merged = session.merge_groups(
@@ -82,7 +82,7 @@ class TestSplitGroup:
     """Verifies that splitting a group preserves the parent source fragment in both children (RF-09)."""
 
     def test_split_group_preserves_parent_source_fragment(self):
-        parent = create_sample_group("oficinas", 8, 35.0, "8 oficinas administrativas con alfombra")
+        parent = create_sample_group("oficinas", 8, 35.0, "8 oficinas administrativas con alfombra de 35 m²")
         session = ProposalReviewSession(revisable_groups=[parent])
 
         child1, child2 = session.split_group(
@@ -128,7 +128,7 @@ class TestDiscardAndConfirmProposal:
         assert len(session.discarded_groups) == 1
 
     def test_confirm_valid_proposal_incorporates_it(self):
-        g = create_sample_group("aulas", 3, 40.0, "3 aulas")
+        g = create_sample_group("aulas", 3, 40.0, "3 aulas de 40 m²")
         session = ProposalReviewSession(revisable_groups=[g])
 
         confirmed = session.confirm_group(g.id)

@@ -148,7 +148,7 @@ class TestRealisticSpanishExtractionScenarios:
         
         Texto: 'Planta Industrial: taller mecánico en buen estado según informe matutino pero pésimo/malo según auditoría.'
         """
-        text_input = "Planta Industrial: taller mecánico en buen estado según informe matutino pero en mal estado según auditoría."
+        text_input = "Planta Industrial: 1 taller mecánico de 150 m² en buen estado según informe matutino pero en mal estado según auditoría."
 
         mock_client = MagicMock(spec=GeminiExtractionClient)
         mock_client.call_gemini.return_value = {
@@ -158,7 +158,7 @@ class TestRealisticSpanishExtractionScenarios:
                     "quantity": 1,
                     "unit_area_m2": 150.0,
                     "conflicting_conditions": ["bueno", "malo"],
-                    "source_fragment": "taller mecánico en buen estado según informe matutino pero en mal estado",
+                    "source_fragment": "1 taller mecánico de 150 m² en buen estado según informe matutino pero en mal estado",
                 }
             ]
         }

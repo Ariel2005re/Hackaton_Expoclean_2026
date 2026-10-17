@@ -1,19 +1,18 @@
 """FastAPI router for assisted extraction and proposal review (Task C06 · RF-06, RF-09–RF-11, RF-29–RF-31)."""
 
-from typing import List, Optional
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from backend.app.extraction.models import (
     AnalyzeSpacesPayload,
-    ConfirmGroupRequest,
-    CorrectAttributeRequest,
-    DiscardGroupRequest,
+    ConfirmReviewPayload,
+    CorrectReviewPayload,
+    DiscardReviewPayload,
     ExtractionInputRequest,
     ExtractionServiceResponse,
-    MergeGroupsRequest,
-    ProposedSpaceGroup,
-    SplitGroupRequest,
+    MergeReviewPayload,
+    ReviewSessionState,
+    SplitReviewPayload,
     TextValidationResult,
 )
 from backend.app.extraction.proposal_manager import ProposalReviewSession
@@ -73,3 +72,74 @@ async def upload_txt(file: UploadFile = File(...)) -> TextValidationResult:
     """Read TXT file bytes, ensure UTF-8 encoding, and validate content limits."""
     content_bytes = await file.read()
     return validate_txt_file(content_bytes, filename=file.filename, strict=False)
+
+
+def _review_session(state: ReviewSessionState) -> ProposalReviewSession:
+    session = ProposalReviewSession(
+        original_text=state.original_text,
+        revisable_groups=list(state.revisable_groups),
+        defective_groups=list(state.defective_groups),
+        confirmed_groups=list(state.confirmed_groups),
+    )
+    session.discarded_groups = list(state.discarded_groups)
+    return session
+
+
+def _review_state(session: ProposalReviewSession) -> ReviewSessionState:
+    return ReviewSessionState(
+        original_text=session.original_text,
+        revisable_groups=session.revisable_groups,
+        defective_groups=session.defective_groups,
+        confirmed_groups=session.confirmed_groups,
+        discarded_groups=session.discarded_groups,
+    )
+
+
+@extraction_router.post("/review/correct", response_model=ReviewSessionState)
+def correct_review(payload: CorrectReviewPayload) -> ReviewSessionState:
+    session = _review_session(payload.session)
+    try:
+        session.correct_attribute(**payload.action.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _review_state(session)
+
+
+@extraction_router.post("/review/merge", response_model=ReviewSessionState)
+def merge_review(payload: MergeReviewPayload) -> ReviewSessionState:
+    session = _review_session(payload.session)
+    try:
+        session.merge_groups(**payload.action.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _review_state(session)
+
+
+@extraction_router.post("/review/split", response_model=ReviewSessionState)
+def split_review(payload: SplitReviewPayload) -> ReviewSessionState:
+    session = _review_session(payload.session)
+    try:
+        session.split_group(**payload.action.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _review_state(session)
+
+
+@extraction_router.post("/review/discard", response_model=ReviewSessionState)
+def discard_review(payload: DiscardReviewPayload) -> ReviewSessionState:
+    session = _review_session(payload.session)
+    try:
+        session.discard_group(**payload.action.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _review_state(session)
+
+
+@extraction_router.post("/review/confirm", response_model=ReviewSessionState)
+def confirm_review(payload: ConfirmReviewPayload) -> ReviewSessionState:
+    session = _review_session(payload.session)
+    try:
+        session.confirm_group(**payload.action.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _review_state(session)

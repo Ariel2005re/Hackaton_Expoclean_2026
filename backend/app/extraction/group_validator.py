@@ -8,7 +8,10 @@ Rules:
 - If all groups are defective (or no groups found), fallback_to_manual is triggered (RF-29 / RF-11).
 """
 
+import math
+import re
 import uuid
+from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List, Optional, Tuple
 
 from backend.app.extraction.models import (
@@ -18,6 +21,53 @@ from backend.app.extraction.models import (
     ExtractionAnalysisResult,
     ProposedSpaceGroup,
 )
+
+
+def _positive_integer(value: Any) -> int:
+    if isinstance(value, bool):
+        raise ValueError("boolean is not an integer quantity")
+    try:
+        number = Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        raise ValueError("not numeric") from None
+    if not number.is_finite() or number != number.to_integral_value() or number <= 0:
+        raise ValueError("not a positive integer")
+    return int(number)
+
+
+def _positive_area(value: Any) -> float:
+    if isinstance(value, bool):
+        raise ValueError("boolean is not an area")
+    try:
+        number = float(value)
+    except (ValueError, TypeError, OverflowError):
+        raise ValueError("not numeric") from None
+    if not math.isfinite(number) or number <= 0:
+        raise ValueError("not a finite positive area")
+    return number
+
+
+def _number_is_backed(value: int | float, fragment: str) -> bool:
+    number = format(value, "g")
+    pattern = rf"(?<!\d){re.escape(number).replace(r'\.', '[.,]')}(?!\d)"
+    return re.search(pattern, fragment) is not None
+
+
+def _condition_is_backed(value: str, fragment: str) -> bool:
+    words = {
+        "bueno": ("bueno", "buena", "buen"),
+        "regular": ("regular",),
+        "malo": ("malo", "mala", "mal"),
+    }[value]
+    return any(re.search(rf"\b{word}\b", fragment.casefold()) for word in words)
+
+
+def _visits_are_backed(value: int, fragment: str) -> bool:
+    number = str(value)
+    return bool(
+        re.search(rf"\b{number}\s+(?:visitas?|veces)\b", fragment.casefold())
+        or re.search(rf"\b(?:visitas?|veces)\s+{number}\b", fragment.casefold())
+    )
 
 
 def validate_proposed_group(
@@ -48,38 +98,49 @@ def validate_proposed_group(
     quantity = raw_group.get("quantity")
     if quantity is not None:
         try:
-            quantity = int(quantity)
-            if quantity <= 0:
-                defect_reasons.append(f"La cantidad debe ser un entero positivo (recibido: {quantity}).")
-        except (ValueError, TypeError):
+            quantity = _positive_integer(quantity)
+        except ValueError:
             defect_reasons.append(f"Cantidad no numérica o inválida (recibido: {quantity}).")
 
     unit_area = raw_group.get("unit_area_m2")
     if unit_area is not None:
         try:
-            unit_area = float(unit_area)
-            if unit_area <= 0:
-                defect_reasons.append(f"La superficie por unidad debe ser positiva (recibido: {unit_area}).")
-        except (ValueError, TypeError):
+            unit_area = _positive_area(unit_area)
+        except ValueError:
             defect_reasons.append(f"Superficie por unidad no numérica o inválida (recibido: {unit_area}).")
 
     total_area = raw_group.get("total_area_m2")
     if total_area is not None:
         try:
-            total_area = float(total_area)
-            if total_area <= 0:
-                defect_reasons.append(f"La superficie total debe ser positiva (recibido: {total_area}).")
-        except (ValueError, TypeError):
+            total_area = _positive_area(total_area)
+        except ValueError:
             defect_reasons.append(f"Superficie total no numérica o inválida (recibido: {total_area}).")
 
     visits_per_day = raw_group.get("visits_per_day")
     if visits_per_day is not None:
         try:
-            visits_per_day = int(visits_per_day)
-            if visits_per_day <= 0:
-                defect_reasons.append(f"Las visitas por día deben ser un entero positivo (recibido: {visits_per_day}).")
-        except (ValueError, TypeError):
+            visits_per_day = _positive_integer(visits_per_day)
+        except ValueError:
             defect_reasons.append(f"Visitas por día no numéricas (recibido: {visits_per_day}).")
+
+    raw_condition = raw_group.get("condition")
+    if raw_condition is not None and raw_condition not in ("bueno", "regular", "malo"):
+        defect_reasons.append("El estado propuesto no puede representarse.")
+    cleaning_type = raw_group.get("cleaning_type")
+    if cleaning_type is not None and cleaning_type not in ("general", "especializado"):
+        defect_reasons.append("El tipo de trabajo propuesto no puede representarse.")
+    service_days = raw_group.get("service_days")
+    if service_days is not None and (
+        not isinstance(service_days, list)
+        or any(not isinstance(day, str) or not day.strip() for day in service_days)
+    ):
+        defect_reasons.append("Los días de servicio propuestos no pueden representarse.")
+    conflicting_conds = raw_group.get("conflicting_conditions")
+    if conflicting_conds is not None and (
+        not isinstance(conflicting_conds, list)
+        or any(not isinstance(value, str) for value in conflicting_conds)
+    ):
+        defect_reasons.append("Los valores contradictorios no pueden representarse.")
 
     # If any defect was found, classify as defective (RF-09, RF-29)
     if defect_reasons:
@@ -88,6 +149,25 @@ def validate_proposed_group(
     # 3. Build revisable group with attribute provenance (RF-07, RF-08, RF-09)
     warnings: List[str] = []
     attributes: Dict[str, AttributeProvenance] = {}
+
+    for field, value in (("quantity", quantity), ("unit_area_m2", unit_area),
+                         ("total_area_m2", total_area), ("visits_per_day", visits_per_day)):
+        if value is not None and not _number_is_backed(value, source_fragment):
+            warnings.append(f"{field} no tiene respaldo numérico en el fragmento; queda pendiente de revisión.")
+            if field == "quantity":
+                quantity = None
+            elif field == "unit_area_m2":
+                unit_area = None
+            elif field == "total_area_m2":
+                total_area = None
+            else:
+                visits_per_day = None
+    if visits_per_day is not None and not _visits_are_backed(visits_per_day, source_fragment):
+        visits_per_day = None
+        warnings.append("Las visitas por día no tienen respaldo en el fragmento; quedan pendientes.")
+    if service_days and any(day.casefold() not in source_fragment.casefold() for day in service_days):
+        service_days = None
+        warnings.append("Los días de servicio no tienen respaldo en el fragmento; quedan pendientes.")
 
     # Attribute: name
     attributes["name"] = AttributeProvenance(
@@ -143,8 +223,6 @@ def validate_proposed_group(
         )
 
     # Attribute: condition (bueno, regular, malo, contradictorio o ausente)
-    raw_condition = raw_group.get("condition")
-    conflicting_conds = raw_group.get("conflicting_conditions")
     if conflicting_conds and len(conflicting_conds) > 1:
         # Contradiction detected (RF-08)
         from backend.app.extraction.provenance import build_contradictory_provenance
@@ -157,7 +235,7 @@ def validate_proposed_group(
             "Requiere resolución humana."
         )
         condition_val = None
-    elif raw_condition in ("bueno", "regular", "malo"):
+    elif raw_condition in ("bueno", "regular", "malo") and _condition_is_backed(raw_condition, source_fragment):
         attributes["condition"] = AttributeProvenance(
             value=raw_condition,
             condition=AttributeCondition.EXPLICIT,
@@ -173,8 +251,7 @@ def validate_proposed_group(
         warnings.append("Estado físico (bueno/regular/malo) ausente; pendiente de seleccionar.")
 
     # Attribute: cleaning_type
-    cleaning_type = raw_group.get("cleaning_type")
-    if cleaning_type in ("general", "especializado"):
+    if cleaning_type in ("general", "especializado") and cleaning_type in source_fragment.casefold():
         attributes["cleaning_type"] = AttributeProvenance(
             value=cleaning_type,
             condition=AttributeCondition.EXPLICIT,
@@ -182,11 +259,11 @@ def validate_proposed_group(
         )
     else:
         attributes["cleaning_type"] = AttributeProvenance(
-            value="general",
-            condition=AttributeCondition.EXPLICIT,
-            source_fragment=source_fragment,
+            value=None,
+            condition=AttributeCondition.ABSENT,
         )
-        cleaning_type = "general"
+        cleaning_type = None
+        warnings.append("Tipo de trabajo no especificado en el texto; pendiente de completar.")
 
     # Attribute: visits_per_day
     if visits_per_day is not None:
@@ -202,7 +279,6 @@ def validate_proposed_group(
         )
 
     # Attribute: service_days
-    service_days = raw_group.get("service_days")
     if service_days and isinstance(service_days, list):
         attributes["service_days"] = AttributeProvenance(
             value=service_days,
@@ -254,12 +330,35 @@ def parse_extraction_response(
     defective_groups: List[DefectiveSpaceGroup] = []
     warnings: List[str] = []
 
+    if not isinstance(raw_spaces, list):
+        raw_spaces = []
+        warnings.append("La respuesta de Gemini no contiene una lista de espacios revisable.")
+
     for idx, raw_group in enumerate(raw_spaces, start=1):
         if not isinstance(raw_group, dict):
             defective_groups.append(
                 DefectiveSpaceGroup(
                     raw_data={"raw": raw_group},
                     defect_reasons=["El elemento no tiene estructura de diccionario."],
+                )
+            )
+            continue
+
+        fragment = raw_group.get("source_fragment")
+        if original_text and isinstance(fragment, str) and fragment.strip() and fragment.strip().casefold() not in original_text.casefold():
+            defective_groups.append(
+                DefectiveSpaceGroup(
+                    raw_data=raw_group,
+                    defect_reasons=["El fragmento de respaldo del espacio no aparece en el texto confirmado."],
+                )
+            )
+            continue
+        name = raw_group.get("name")
+        if isinstance(name, str) and isinstance(fragment, str) and name.strip() and name.strip().casefold() not in fragment.casefold():
+            defective_groups.append(
+                DefectiveSpaceGroup(
+                    raw_data=raw_group,
+                    defect_reasons=["El nombre o tipo de espacio no tiene respaldo en el fragmento."],
                 )
             )
             continue

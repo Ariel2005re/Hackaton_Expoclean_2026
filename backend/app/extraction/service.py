@@ -110,13 +110,13 @@ class ExtractionService:
                 error_code=exc.code,
                 warnings=["La IA devolvió una respuesta no utilizable. Puede continuar mediante el formulario manual."],
             )
-        except Exception as exc:
+        except Exception:
             return ExtractionServiceResponse(
                 status=AnalysisStatus.UNAVAILABLE,
                 original_text=request.text,
                 confirmed_groups=confirmed_groups,
                 fallback_to_manual=True,
-                message=f"Error inesperado al consultar Gemini: {exc}",
+                message="Error inesperado al consultar Gemini.",
                 error_code="UNEXPECTED_ERROR",
                 warnings=["Ocurrió un error en el servidor. Puede continuar manualmente."],
             )

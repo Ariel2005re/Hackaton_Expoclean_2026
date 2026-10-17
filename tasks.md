@@ -67,24 +67,24 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 ## P3 — extracción Gemini y revisión de propuestas
 
-**Rama:** `feature/mvp-gemini`. **Propiedad:** `backend/app/extraction/` y sus pruebas. Usa el contrato acordado y un doble de almacenamiento hasta integración. **Revisor:** P2.
+**Rama:** `feature/mvp-gemini`. **Propiedad:** `backend/app/extraction/` y sus pruebas. Usa el contrato acordado y un doble de almacenamiento hasta integración. **Revisor:** Codex para C08, por instrucción del usuario; revisión de P2 sustituida.
 
-- [ ] **C01 · 20 min · Dep.: G02 · RF-06, RF-30–RF-31.** Validar texto pegado/TXT UTF-8, blancos y límite de 50 000 puntos de código Unicode sobre el texto confirmado.
+- [x] **C01 · 20 min · Dep.: G02 · RF-06, RF-30–RF-31.** Validar texto pegado/TXT UTF-8, blancos y límite de 50 000 puntos de código Unicode sobre el texto confirmado.
   **Hecho cuando:** un emoji cuenta como un punto y blancos o exceso impiden llamar a Gemini sin perder el texto.
-- [ ] **C02 · 25 min · Dep.: C01 · RF-06, RF-11, RF-29–RF-30.** Encapsular la llamada del servidor a Gemini con clave fuera de cliente y registros, control de rechazo y espera.
+- [x] **C02 · 25 min · Dep.: C01 · RF-06, RF-11, RF-29–RF-30.** Encapsular la llamada del servidor a Gemini con clave fuera de cliente y registros, control de rechazo y espera.
   **Hecho cuando:** una prueba comprueba que solo se envía texto confirmado y que la clave no aparece en salida ni errores.
-- [ ] **C03 · 25 min · Dep.: A02, C02 · RF-07–RF-09, RF-29.** Validar cada grupo de la respuesta y exigir nombre o tipo con fragmento de respaldo.
+- [x] **C03 · 25 min · Dep.: A02, C02 · RF-07–RF-09, RF-29.** Validar cada grupo de la respuesta y exigir nombre o tipo con fragmento de respaldo.
   **Hecho cuando:** una respuesta mixta deja revisable el grupo identificable y señala sin incorporar el defectuoso.
-- [ ] **C04 · 25 min · Dep.: C03 · RF-07–RF-09.** Representar procedencia por atributo, ausencia, contradicción y derivación de 280 m² ÷ 8 oficinas.
+- [x] **C04 · 25 min · Dep.: C03 · RF-07–RF-09.** Representar procedencia por atributo, ausencia, contradicción y derivación de 280 m² ÷ 8 oficinas.
   **Hecho cuando:** cada valor visible tiene origen u operación y las contradicciones permanecen sin confirmar.
-- [ ] **C05 · 25 min · Dep.: C04 · RF-08–RF-10.** Implementar corrección, combinación, separación, descarte y confirmación de propuestas como operaciones previas a incorporación.
+- [x] **C05 · 25 min · Dep.: C04 · RF-08–RF-10.** Implementar corrección, combinación, separación, descarte y confirmación de propuestas como operaciones previas a incorporación.
   **Hecho cuando:** el respaldo por atributo sobrevive a combinar/separar y un reanálisis no duplica grupos confirmados.
-- [ ] **C06 · 20 min · Dep.: C02–C05 · RF-06, RF-09–RF-11, RF-29–RF-31.** Exponer análisis y revisión conforme al contrato; conservar texto y ruta manual ante error.
+- [x] **C06 · 20 min · Dep.: C02–C05 · RF-06, RF-09–RF-11, RF-29–RF-31.** Exponer análisis y revisión conforme al contrato; conservar texto y ruta manual ante error.
   **Hecho cuando:** éxito, respuesta parcial, rechazo y espera entregan estados distinguibles sin alterar grupos confirmados.
-- [ ] **C07 · 25 min · Dep.: C06 · RF-06–RF-11, RF-29–RF-31.** Probar con respuestas simuladas deterministas y descripciones españolas de varios espacios.
+- [x] **C07 · 25 min · Dep.: C06 · RF-06–RF-11, RF-29–RF-31.** Probar con respuestas simuladas deterministas y descripciones españolas de varios espacios.
   **Hecho cuando:** se comprueban datos explícitos, faltantes, contradicción, grupo defectuoso, derivación y fallos de Gemini.
-- [ ] **C08 · 20 min · Dep.: C07 · RF-06–RF-11, RF-29–RF-31.** Ejecutar pruebas de la rama, registrar RF cubiertos y solicitar revisión a P2.
-  **Hecho cuando:** resultados reproducibles y revisión de P2 quedan registrados.
+- [x] **C08 · 20 min · Dep.: C07 · RF-06–RF-11, RF-29–RF-31.** Ejecutar pruebas de la rama, registrar RF cubiertos y realizar revisión técnica por Codex en sustitución de P2, según instrucción del usuario.
+  **Hecho cuando:** resultados reproducibles y revisión técnica quedan registrados.
 
 ## P4 — interfaz React
 

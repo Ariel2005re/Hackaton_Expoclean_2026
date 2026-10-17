@@ -113,11 +113,13 @@ class ProposalReviewSession:
         g2 = self.get_group(group_id_2)
         if g1 is None or g2 is None:
             raise ValueError("Uno o ambos grupos a combinar no fueron encontrados.")
+        if group_id_1 == group_id_2:
+            raise ValueError("Se requieren dos grupos distintos para combinar.")
 
         name = merged_name or g1.name
         q1 = g1.quantity or 0
         q2 = g2.quantity or 0
-        combined_quantity = (q1 + q2) if (q1 + q2) > 0 else None
+        combined_quantity = (q1 + q2) if g1.quantity is not None and g2.quantity is not None else None
 
         # Unit area: if matching, keep it; else weighted average
         u1 = g1.unit_area_m2
@@ -132,7 +134,7 @@ class ProposalReviewSession:
             else:
                 combined_unit_area = u1
         else:
-            combined_unit_area = u1 or u2
+            combined_unit_area = None
 
         combined_total_area = None
         if combined_quantity and combined_unit_area:
@@ -149,16 +151,16 @@ class ProposalReviewSession:
             ),
             "quantity": AttributeProvenance(
                 value=combined_quantity,
-                condition=AttributeCondition.HUMAN_CORRECTED,
-                source_fragment=combined_source,
-                operation=f"Suma de cantidades: {q1} + {q2} = {combined_quantity}",
-                origin_values={"group_1_quantity": q1, "group_2_quantity": q2},
+                condition=AttributeCondition.HUMAN_CORRECTED if combined_quantity is not None else AttributeCondition.ABSENT,
+                source_fragment=combined_source if combined_quantity is not None else None,
+                operation=f"Suma de cantidades: {q1} + {q2} = {combined_quantity}" if combined_quantity is not None else None,
+                origin_values={"group_1_quantity": q1, "group_2_quantity": q2} if combined_quantity is not None else None,
             ),
             "unit_area_m2": AttributeProvenance(
                 value=combined_unit_area,
-                condition=AttributeCondition.HUMAN_CORRECTED,
-                source_fragment=combined_source,
-                operation=f"Superficie unificada de grupos combinados: {combined_unit_area:g} m²",
+                condition=AttributeCondition.HUMAN_CORRECTED if combined_unit_area is not None else AttributeCondition.ABSENT,
+                source_fragment=combined_source if combined_unit_area is not None else None,
+                operation=f"Superficie unificada de grupos combinados: {combined_unit_area:g} m²" if combined_unit_area is not None else None,
             ),
         }
 
@@ -169,14 +171,35 @@ class ProposalReviewSession:
                 source_fragment=combined_source,
                 operation=f"{combined_quantity} {name} × {combined_unit_area:g} m² = {combined_total_area:g} m²",
             )
+        else:
+            merged_attributes["total_area_m2"] = AttributeProvenance(
+                value=None,
+                condition=AttributeCondition.ABSENT,
+            )
 
-        # Inherit condition if same, else mark absent for resolution
-        cond = g1.condition if g1.condition == g2.condition else None
-        merged_attributes["condition"] = AttributeProvenance(
-            value=cond,
-            condition=AttributeCondition.HUMAN_CORRECTED if cond else AttributeCondition.ABSENT,
-            source_fragment=combined_source,
-        )
+        def shared_attribute(field: str):
+            first = getattr(g1, field)
+            second = getattr(g2, field)
+            if first is not None and first == second:
+                return first, AttributeProvenance(
+                    value=first,
+                    condition=AttributeCondition.HUMAN_CORRECTED,
+                    source_fragment=combined_source,
+                    operation=f"Valor conservado al combinar: {field}",
+                )
+            if first is not None and second is not None:
+                return None, AttributeProvenance(
+                    value=None,
+                    condition=AttributeCondition.CONTRADICTORY,
+                    source_fragment=combined_source,
+                    conflicting_values=[first, second],
+                )
+            return None, AttributeProvenance(value=None, condition=AttributeCondition.ABSENT)
+
+        cond, merged_attributes["condition"] = shared_attribute("condition")
+        cleaning_type, merged_attributes["cleaning_type"] = shared_attribute("cleaning_type")
+        service_days, merged_attributes["service_days"] = shared_attribute("service_days")
+        visits_per_day, merged_attributes["visits_per_day"] = shared_attribute("visits_per_day")
 
         merged_group = ProposedSpaceGroup(
             id=str(uuid.uuid4()),
@@ -185,9 +208,9 @@ class ProposalReviewSession:
             unit_area_m2=combined_unit_area,
             total_area_m2=combined_total_area,
             condition=cond,
-            cleaning_type=g1.cleaning_type or g2.cleaning_type or "general",
-            service_days=g1.service_days or g2.service_days,
-            visits_per_day=g1.visits_per_day or g2.visits_per_day,
+            cleaning_type=cleaning_type,
+            service_days=service_days,
+            visits_per_day=visits_per_day,
             source_fragment=combined_source,
             attributes=merged_attributes,
             is_revisable=True,
@@ -245,12 +268,10 @@ class ProposalReviewSession:
                     origin_values={"parent_quantity": total_q, "split_quantity": qty},
                 ),
             }
-            if parent.unit_area_m2:
-                attrs["unit_area_m2"] = AttributeProvenance(
-                    value=parent.unit_area_m2,
-                    condition=AttributeCondition.EXPLICIT,
-                    source_fragment=parent.source_fragment,
-                )
+            attrs["unit_area_m2"] = parent.attributes.get(
+                "unit_area_m2",
+                AttributeProvenance(value=None, condition=AttributeCondition.ABSENT),
+            ).model_copy(deep=True)
             if tot:
                 attrs["total_area_m2"] = AttributeProvenance(
                     value=tot,
@@ -258,12 +279,13 @@ class ProposalReviewSession:
                     source_fragment=parent.source_fragment,
                     operation=f"{qty} {name} × {parent.unit_area_m2:g} m² = {tot:g} m²",
                 )
-            if parent.condition:
-                attrs["condition"] = AttributeProvenance(
-                    value=parent.condition,
-                    condition=AttributeCondition.EXPLICIT,
-                    source_fragment=parent.source_fragment,
-                )
+            else:
+                attrs["total_area_m2"] = AttributeProvenance(value=None, condition=AttributeCondition.ABSENT)
+            for field in ("condition", "cleaning_type", "service_days", "visits_per_day"):
+                attrs[field] = parent.attributes.get(
+                    field,
+                    AttributeProvenance(value=None, condition=AttributeCondition.ABSENT),
+                ).model_copy(deep=True)
 
             child = ProposedSpaceGroup(
                 id=str(uuid.uuid4()),

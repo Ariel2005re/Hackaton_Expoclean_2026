@@ -90,7 +90,7 @@ class TestDistinguishableStatusesAndPreservation:
 
         service = ExtractionService(client=mock_client)
         req = ExtractionInputRequest(
-            text="1 bodega y 2 espacios sin nombre",
+            text="1 bodega de 25 m² y 2 espacios sin nombre",
             confirmed=True,
             personal_data_warning_acknowledged=True,
         )

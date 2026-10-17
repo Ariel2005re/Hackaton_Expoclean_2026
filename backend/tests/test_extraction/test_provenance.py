@@ -98,7 +98,7 @@ class TestContradictionManagementAndConfirmationBlocking:
             "quantity": 5,
             "unit_area_m2": 40.0,
             "conflicting_conditions": ["bueno", "malo"],
-            "source_fragment": "aulas con estados dispares",
+            "source_fragment": "5 aulas de 40 m² con estados dispares",
         }
         group, _ = validate_proposed_group(raw_group)
         assert group.can_be_confirmed is False
