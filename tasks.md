@@ -48,21 +48,21 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 **Rama:** `feature/mvp-estimation`. **Propiedad:** `backend/app/estimation/` y sus pruebas. Trabaja con datos del contrato y dobles de persistencia; no modifica migraciones ni registro global de rutas. **Revisor:** P1.
 
-- [ ] **B01 · 25 min · Dep.: G02 · RF-03, RF-33.** Calcular límites inclusivos de semana, quincena y mes, incluidos comienzos 29–31 y año bisiesto.
+- [x] **B01 · 25 min · Dep.: G02 · RF-03, RF-33.** Calcular límites inclusivos de semana, quincena y mes, incluidos comienzos 29–31 y año bisiesto.
   **Hecho cuando:** ejemplos del 15 de enero al 14 de febrero y del 31 de enero a fin de febrero dan los días esperados.
-- [ ] **B02 · 25 min · Dep.: B01 · RF-04, RF-20, RF-33.** Contar intervenciones por grupo y jornadas distintas con servicio, incluidos feriados y coincidencia de grupos.
+- [x] **B02 · 25 min · Dep.: B01 · RF-04, RF-20, RF-33.** Contar intervenciones por grupo y jornadas distintas con servicio, incluidos feriados y coincidencia de grupos.
   **Hecho cuando:** dos grupos el mismo día suman sus visitas, pero solo una jornada compartida.
-- [ ] **B03 · 25 min · Dep.: G02 · RF-04, RF-12, RF-16, RF-18, RF-32.** Estimar m² físicos y horas por tipo con superficie especializada propia, rendimiento y factor de estado.
+- [x] **B03 · 25 min · Dep.: G02 · RF-04, RF-12, RF-16, RF-18, RF-32.** Estimar m² físicos y horas por tipo con superficie especializada propia, rendimiento y factor de estado.
   **Hecho cuando:** el cálculo separa general y especializado y rechaza rendimiento, factor o superficie usada no positivos.
-- [ ] **B04 · 25 min · Dep.: B02–B03 · RF-03, RF-19, RF-23.** Calcular duración con dotación por tipo y comprobar la suma de visitas diarias de cada grupo contra el horario.
+- [x] **B04 · 25 min · Dep.: B02–B03 · RF-03, RF-19, RF-23.** Calcular duración con dotación por tipo y comprobar la suma de visitas diarias de cada grupo contra el horario.
   **Hecho cuando:** cambiar solo personas mantiene horas/costo, y dos visitas que juntas exceden la ventana bloquean emisión.
-- [ ] **B05 · 20 min · Dep.: B02 · RF-20–RF-21, RF-33.** Calcular una línea por recurso de grupo/intervención y por recurso compartido/jornada.
+- [x] **B05 · 20 min · Dep.: B02 · RF-20–RF-21, RF-33.** Calcular una línea por recurso de grupo/intervención y por recurso compartido/jornada.
   **Hecho cuando:** cantidades decimales se cobran con recurrencia correcta sin duplicar compartidos.
-- [ ] **B06 · 25 min · Dep.: B03, B05 · RF-18, RF-21, RF-32.** Calcular líneas laborales por grupo y tipo y precio USD con redondeo por línea, margen, descuento e impuesto.
+- [x] **B06 · 25 min · Dep.: B03, B05 · RF-18, RF-21, RF-32.** Calcular líneas laborales por grupo y tipo y precio USD con redondeo por línea, margen, descuento e impuesto.
   **Hecho cuando:** una tabla de valores esperados reproduce costo directo, subtotal, impuesto y total al centavo.
-- [ ] **B07 · 25 min · Dep.: B04, B06 · RF-02–RF-04, RF-13, RF-21, RF-23, RF-32.** Reunir pendientes de emisión sin bloquear el guardado del borrador.
+- [x] **B07 · 25 min · Dep.: B04, B06 · RF-02–RF-04, RF-13, RF-21, RF-23, RF-32.** Reunir pendientes de emisión sin bloquear el guardado del borrador.
   **Hecho cuando:** cliente, grupo, superficie especializada, horario, magnitudes o subtotal inválidos generan pendientes específicos y ningún PDF habilitado.
-- [ ] **B08 · 25 min · Dep.: A02, B01–B07 · RF-03–RF-04, RF-12–RF-13, RF-18–RF-21, RF-23, RF-32–RF-33.** Exponer la vista previa conforme al contrato y probarla con casos límite de calendario y dinero.
+- [x] **B08 · 25 min · Dep.: A02, B01–B07 · RF-03–RF-04, RF-12–RF-13, RF-18–RF-21, RF-23, RF-32–RF-33.** Exponer la vista previa conforme al contrato y probarla con casos límite de calendario y dinero.
   **Hecho cuando:** la respuesta incluye conteos, horas, líneas y pendientes verificables sin depender de la interfaz.
 - [ ] **B09 · 20 min · Dep.: B08 · RF-03–RF-04, RF-12–RF-13, RF-18–RF-21, RF-23, RF-32–RF-33.** Ejecutar pruebas de la rama, registrar RF cubiertos y solicitar revisión a P1.
   **Hecho cuando:** las pruebas pasan y P1 confirma los resultados y el contrato de vista previa.
