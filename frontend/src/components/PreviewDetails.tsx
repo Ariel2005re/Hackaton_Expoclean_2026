@@ -3,6 +3,7 @@ import type { VistaPrevia } from "../types/borrador";
 const obj = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 const label = (value: unknown) => (value == null ? "—" : String(value));
+const money = (value: unknown) => value == null ? "—" : Number(value).toFixed(2);
 
 export default function PreviewDetails({ preview }: { preview: VistaPrevia }) {
   const calendar = obj(preview.calendar_summary);
@@ -97,7 +98,7 @@ export default function PreviewDetails({ preview }: { preview: VistaPrevia }) {
                       : `Grupo ${label(line.group_id)}`}
                   </td>
                   <td>{label(line.recurrence_count)}</td>
-                  <td>{label(line.rounded_total)}</td>
+                  <td>{money(line.rounded_total)}</td>
                 </tr>
               ))}
             </tbody>
@@ -105,43 +106,43 @@ export default function PreviewDetails({ preview }: { preview: VistaPrevia }) {
           <dl className="totals">
             <div>
               <dt>Mano de obra general</dt>
-              <dd>{label(price.total_labor_general_usd)}</dd>
+              <dd>{money(price.total_labor_general_usd)}</dd>
             </div>
             <div>
               <dt>Mano de obra especializada</dt>
-              <dd>{label(price.total_labor_specialized_usd)}</dd>
+              <dd>{money(price.total_labor_specialized_usd)}</dd>
             </div>
             <div>
               <dt>Insumos</dt>
-              <dd>{label(price.total_insumos_usd)}</dd>
+              <dd>{money(price.total_insumos_usd)}</dd>
             </div>
             <div>
               <dt>Herramientas</dt>
-              <dd>{label(price.total_herramientas_usd)}</dd>
+              <dd>{money(price.total_herramientas_usd)}</dd>
             </div>
             <div>
               <dt>Costo directo</dt>
-              <dd>{label(price.direct_cost_usd)}</dd>
+              <dd>{money(price.direct_cost_usd)}</dd>
             </div>
             <div>
               <dt>Margen</dt>
-              <dd>{label(price.margin_usd)}</dd>
+              <dd>{money(price.margin_usd)}</dd>
             </div>
             <div>
               <dt>Descuento</dt>
-              <dd>{label(price.discount_usd)}</dd>
+              <dd>{money(price.discount_usd)}</dd>
             </div>
             <div>
               <dt>Subtotal</dt>
-              <dd>{label(price.subtotal_usd)}</dd>
+              <dd>{money(price.subtotal_usd)}</dd>
             </div>
             <div>
               <dt>Impuesto</dt>
-              <dd>{label(price.tax_usd)}</dd>
+              <dd>{money(price.tax_usd)}</dd>
             </div>
             <div className="grand-total">
               <dt>Total USD</dt>
-              <dd>{label(price.total_usd)}</dd>
+              <dd>{money(price.total_usd)}</dd>
             </div>
           </dl>
           {Boolean(price.subtotal_error) && (
