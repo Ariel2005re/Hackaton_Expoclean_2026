@@ -78,6 +78,7 @@ class WorkTypeEffortResult:
     total_hours_per_intervention: Decimal
     assigned_workers: int
     duration_hours: Decimal  # total_hours / workers
+    suggested_workers: Optional[int] = None  # Advisory; requires a valid daily window.
 
 
 @dataclass

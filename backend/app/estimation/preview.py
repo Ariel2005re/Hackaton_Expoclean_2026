@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date, time
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING
 from typing import Optional, Sequence, Union
 
 from backend.app.estimation.calendar import (
@@ -335,6 +335,12 @@ def generate_estimation_preview(quote: QuoteDraftInput) -> EstimationPreviewResu
 
             # Comprobar si cabe en la ventana horaria si horario está disponible
             if window_hours is not None and quote.service and quote.service.start_time and quote.service.end_time:
+                # RF-19: each independent team must fit all daily visits. The
+                # suggestion never changes the chosen staff, hours or price.
+                for work in (effort_res.general, effort_res.specialized):
+                    if work is not None:
+                        required = work.total_hours_per_intervention * Decimal(g_draft.visits_per_day or 1) / window_hours
+                        work.suggested_workers = max(1, int(required.to_integral_value(rounding=ROUND_CEILING)))
                 fits, daily_dur, win = check_daily_window_fit(
                     visit_duration_hours=effort_res.visit_duration_hours,
                     visits_per_day=g_draft.visits_per_day or 1,
