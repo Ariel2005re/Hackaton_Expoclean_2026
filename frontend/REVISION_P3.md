@@ -1,5 +1,9 @@
 # Revisión cruzada de P3 sobre P4 (`feature/mvp-web`)
 
+## Seguimiento de correcciones — 2026-10-17
+
+Implementados los cuatro cambios: confirmación consumida por envío, recuperación de propuesta y borradores desde API, horas acumuladas por tipo y separación con asignación explícita de recursos. La separación conserva también superficie especializada y horas ajustadas. Se corrigió además el tipo enviado al corregir atributos numéricos ausentes o calendarios y el guardado previo a confirmar propuestas. Se añadieron pruebas de esos comportamientos (18 pruebas frontend en total). Revisión técnica de Codex; pendiente de recorrido real I07–I08 y de aprobación independiente. Los hallazgos de abajo describen la versión original `82160c9`.
+
 **Fecha:** 2026-10-17  
 **Base revisada:** `feature/mvp-web` `82160c9` frente al contrato de `integration/mvp` `d07b94c`  
 **Alcance:** D01–D13, con atención al flujo de Gemini (RF-06–RF-11, RF-29–RF-31). Esta es una revisión técnica realizada por Codex para registrar los resultados de P3; no equivale a una aprobación personal de P3.

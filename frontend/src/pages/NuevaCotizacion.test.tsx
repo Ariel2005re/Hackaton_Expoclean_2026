@@ -48,6 +48,7 @@ beforeEach(() => {
   vi.spyOn(api, "profiles").mockResolvedValue([]);
   vi.spyOn(api, "searchClients").mockResolvedValue([]);
   vi.spyOn(api, "getDraft").mockResolvedValue(draft);
+  vi.spyOn(api, "currentProposal").mockResolvedValue(null);
   vi.spyOn(api, "history").mockResolvedValue([]);
   vi.spyOn(api, "saveDraft").mockImplementation(async (value) => value);
   vi.spyOn(api, "preview").mockResolvedValue(invalid);
@@ -60,15 +61,13 @@ afterEach(() => {
 describe("flujo manual D11", () => {
   it("bloquea emisión con pendientes y permite descargar tras una vista previa válida", async () => {
     const preview = vi.mocked(api.preview);
-    const issue = vi
-      .spyOn(api, "issue")
-      .mockResolvedValue({
-        quote_id: "q1",
-        code: "COT-1",
-        issued_at: "2026-10-17",
-        total_usd: "100.00",
-        pdf_url: "/pdf",
-      });
+    const issue = vi.spyOn(api, "issue").mockResolvedValue({
+      quote_id: "q1",
+      code: "COT-1",
+      issued_at: "2026-10-17",
+      total_usd: "100.00",
+      pdf_url: "/pdf",
+    });
     openPage();
     await screen.findByText("Editar cotización");
     fireEvent.click(
@@ -116,6 +115,67 @@ describe("flujo manual D11", () => {
 });
 
 describe("flujo asistido D12", () => {
+  it("recupera revisión y texto del servidor, y exige confirmar cada envío", async () => {
+    const saved: Propuesta = {
+      id: 9,
+      analysis: {
+        status: "SUCCESS",
+        message: "Revisión recuperada",
+        fallback_to_manual: false,
+      },
+      review: {
+        original_text: "Dos aulas de 40 m²",
+        revisable_groups: [
+          {
+            id: "g",
+            name: "Aulas recuperadas",
+            can_be_confirmed: true,
+            warnings: [],
+            attributes: {
+              quantity: {
+                value: 2,
+                condition: "human_corrected",
+                source_fragment: "Dos aulas",
+              },
+            },
+          },
+        ],
+        defective_groups: [],
+        confirmed_groups: [],
+        discarded_groups: [],
+      },
+    };
+    localStorage.clear();
+    vi.mocked(api.currentProposal).mockResolvedValue(saved);
+    const analyze = vi.spyOn(api, "analyze").mockResolvedValue(saved);
+    openPage();
+    await screen.findByText("Aulas recuperadas");
+    expect(screen.getByLabelText("Texto exacto")).toHaveValue(
+      saved.review.original_text,
+    );
+    expect(
+      screen.getByRole("button", { name: "Analizar descripción" }),
+    ).toBeDisabled();
+    fireEvent.click(screen.getByLabelText(/Confirmo este texto/));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Analizar descripción" }),
+    );
+    await waitFor(() => expect(analyze).toHaveBeenCalledTimes(1));
+    expect(screen.getByLabelText(/Confirmo este texto/)).not.toBeChecked();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Analizar descripción" }),
+    );
+    expect(analyze).toHaveBeenCalledTimes(1);
+    await waitFor(() =>
+      expect(screen.getByLabelText(/Confirmo este texto/)).toBeEnabled(),
+    );
+    fireEvent.click(screen.getByLabelText(/Confirmo este texto/));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Analizar descripción" }),
+    );
+    await waitFor(() => expect(analyze).toHaveBeenCalledTimes(2));
+  });
+
   it("mantiene texto y formulario manual si Gemini falla", async () => {
     vi.spyOn(api, "analyze").mockRejectedValue(new Error("tiempo de espera"));
     openPage();

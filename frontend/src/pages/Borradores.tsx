@@ -7,24 +7,17 @@ export default function Borradores() {
   const [drafts, setDrafts] = useState<Borrador[]>([]);
   const [error, setError] = useState("");
   useEffect(() => {
-    Promise.all(
-      api.localDraftIds().map((id) => api.getDraft(id).catch(() => null)),
-    )
-      .then((items) =>
-        setDrafts(items.filter((item): item is Borrador => item !== null)),
-      )
+    api
+      .listDrafts()
+      .then(setDrafts)
       .catch((e) => setError(String(e)));
   }, []);
   return (
     <section>
       <h1>Borradores</h1>
-      <p>
-        Se muestran los borradores creados en este navegador. El servidor aún no
-        ofrece un listado general.
-      </p>
       {error && <p role="alert">{error}</p>}
       {drafts.length === 0 ? (
-        <p>No hay borradores locales.</p>
+        <p>No hay borradores guardados.</p>
       ) : (
         <ul>
           {drafts.map((d) => (

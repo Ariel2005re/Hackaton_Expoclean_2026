@@ -59,7 +59,7 @@ export default function PreviewDetails({ preview }: { preview: VistaPrevia }) {
                   specialized = obj(group.specialized);
                 const detail = (work: Record<string, unknown>) =>
                   Object.keys(work).length
-                    ? `${label(work.surface_sqm)} m² · ${label(work.total_hours_per_intervention)} h · ${label(work.assigned_workers)} personas · ${label(work.duration_hours)} h de duración`
+                    ? `${label(work.surface_sqm)} m² · ${label(work.total_hours_per_intervention)} h por intervención · ${Number(work.total_hours_per_intervention) * Number(obj(calendar.group_interventions)[id] ?? 0)} h en el período · ${label(work.assigned_workers)} personas · ${label(work.duration_hours)} h de duración`
                     : "No incluido";
                 return (
                   <tr key={id}>

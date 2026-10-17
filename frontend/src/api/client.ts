@@ -31,6 +31,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     }
     throw new ApiError(response.status, detail);
   }
+  if (response.status === 204) return null as T;
   return response.json() as Promise<T>;
 }
 
@@ -169,6 +170,12 @@ function rememberDraft(id: string) {
 }
 
 export const api = {
+  listDrafts: async () =>
+    (await request<Borrador[]>("/cotizaciones/")).map(normalizeDraft),
+  currentProposal: (id: string) =>
+    request<Propuesta | null>(
+      `/cotizaciones/${encodeURIComponent(id)}/propuestas/actual`,
+    ),
   searchClients: (name: string) =>
     request<Cliente[]>(`/clientes/?nombre=${encodeURIComponent(name)}`),
   createClient: (client: Omit<Cliente, "id">) =>
