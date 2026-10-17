@@ -24,6 +24,33 @@ from backend.app.estimation.preview import (
 class TestPreviewAndValidationB07B08:
     """Pruebas para validación de emisión e integración de la vista previa."""
 
+    def test_suggested_staff_accounts_for_visits_without_changing_price(self):
+        """RF-19/23: ceil(3h × 2 visits / 2h) = 3; specialized needs 1."""
+        group = GroupDraftInput(
+            group_id="staff", name="Oficinas", units_count=1, sqm_per_unit=Decimal("150"),
+            service_days=["lunes"], visits_per_day=2, state="bueno", profile_id="1",
+            general_work=WorkTypeDraftInput(enabled=True, productivity_sqm_per_hour=Decimal("50"), hourly_rate_usd=Decimal("10")),
+            specialized_work=WorkTypeDraftInput(enabled=True, custom_surface_sqm=Decimal("25"), productivity_sqm_per_hour=Decimal("50"), hourly_rate_usd=Decimal("12")),
+        )
+        quote = QuoteDraftInput(
+            quote_id="suggestion", client=ClientDraftInput(name="Prueba", service_address="Quito"),
+            service=ServiceDraftInput(start_date=date(2026, 11, 2), period_type=PeriodType.SEMANAL, start_time=time(8), end_time=time(10)),
+            groups=[group], tax_percentage=Decimal("0"),
+        )
+        first = generate_estimation_preview(quote)
+        assert first.group_efforts["staff"].general.suggested_workers == 3
+        assert first.group_efforts["staff"].specialized.suggested_workers == 1
+        assert group.general_work.assigned_workers == 1
+        assert not first.is_emission_valid
+        group.general_work.assigned_workers = 3
+        accepted = generate_estimation_preview(quote)
+        assert accepted.is_emission_valid
+        assert accepted.pricing_summary.total_usd == first.pricing_summary.total_usd == Decimal("72.00")
+        group.general_work.adjusted_hours_per_intervention = Decimal("3.01")
+        assert generate_estimation_preview(quote).group_efforts["staff"].general.suggested_workers == 4
+        quote.service.end_time = None
+        assert generate_estimation_preview(quote).group_efforts["staff"].general.suggested_workers is None
+
     def test_cotizacion_completa_y_valida_habilita_emision(self):
         """Una cotización con todos los datos requeridos habilita emisión y entrega vista previa completa."""
         client = ClientDraftInput(name="Empresa ABC", service_address="Av. Amazonas 123 y Colón")
