@@ -60,6 +60,17 @@ afterEach(() => {
 });
 
 describe("flujo manual D11", () => {
+  it("asocia el texto al borrador guardado y deja vacía la siguiente cotización", async () => {
+    vi.mocked(api.saveDraft).mockImplementation(async (value) => ({ ...value, id: value.id || "q1" }));
+    render(<MemoryRouter initialEntries={["/nueva"]}><App /></MemoryRouter>);
+    fireEvent.change(screen.getByLabelText("Texto exacto"), { target: { value: "Descripción del primer borrador" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+    await screen.findByRole("heading", { name: "Editar cotización" });
+    expect(localStorage.getItem("mvp-web-text-q1")).toBe("Descripción del primer borrador");
+    fireEvent.click(screen.getByRole("link", { name: "Nueva cotización" }));
+    await screen.findByRole("heading", { name: "Nueva cotización" });
+    expect(screen.getByLabelText("Texto exacto")).toHaveValue("");
+  });
   it("al empezar otra cotización no muestra versiones de la anterior", async () => {
     vi.mocked(api.history).mockResolvedValue([{ quote_id: "q1", code: "ANTERIOR", issued_at: "2026-10-17", client: "Anterior", service_address: "Quito", scope: "Oficinas", total: "10.00" }]);
     render(<MemoryRouter initialEntries={["/borradores/q1"]}><App /></MemoryRouter>);
@@ -301,14 +312,14 @@ describe("flujo asistido D12", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Analizar descripción" }),
     );
-    await screen.findByText(/SUCCESS: Revise la propuesta/);
+    await screen.findAllByText(/Revise la propuesta/);
     expect(screen.queryByText("Grupo: Oficinas")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Corregir" }));
-    fireEvent.change(screen.getByLabelText("Nuevo valor de unit_area_m2"), { target: { value: "25" } });
+    fireEvent.change(screen.getByLabelText("Nuevo valor de m² por unidad"), { target: { value: "25" } });
     fireEvent.click(screen.getByRole("button", { name: "Cancelar corrección" }));
     expect(review).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Corregir" }));
-    fireEvent.change(screen.getByLabelText("Nuevo valor de unit_area_m2"), { target: { value: "25" } });
+    fireEvent.change(screen.getByLabelText("Nuevo valor de m² por unidad"), { target: { value: "25" } });
     fireEvent.click(screen.getByRole("button", { name: "Aplicar corrección" }));
     await waitFor(() =>
       expect(review).toHaveBeenCalledWith("q1", 4, "corregir", {
