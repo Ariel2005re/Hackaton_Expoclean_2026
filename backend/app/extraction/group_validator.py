@@ -127,7 +127,7 @@ def validate_proposed_group(
     if raw_condition is not None and raw_condition not in ("bueno", "regular", "malo"):
         defect_reasons.append("El estado propuesto no puede representarse.")
     cleaning_type = raw_group.get("cleaning_type")
-    if cleaning_type is not None and cleaning_type not in ("general", "especializado"):
+    if cleaning_type is not None and cleaning_type not in ("general", "especializado", "ambos"):
         defect_reasons.append("El tipo de trabajo propuesto no puede representarse.")
     service_days = raw_group.get("service_days")
     if service_days is not None and (
@@ -251,7 +251,14 @@ def validate_proposed_group(
         warnings.append("Estado físico (bueno/regular/malo) ausente; pendiente de seleccionar.")
 
     # Attribute: cleaning_type
-    if cleaning_type in ("general", "especializado") and cleaning_type in source_fragment.casefold():
+    general_backed = bool(re.search(r"\bgeneral(?:es)?\b", source_fragment.casefold()))
+    specialized_backed = bool(re.search(r"\bespecializad[oa]s?\b", source_fragment.casefold()))
+    cleaning_backed = {
+        "general": general_backed,
+        "especializado": specialized_backed,
+        "ambos": general_backed and specialized_backed,
+    }.get(cleaning_type, False)
+    if cleaning_backed:
         attributes["cleaning_type"] = AttributeProvenance(
             value=cleaning_type,
             condition=AttributeCondition.EXPLICIT,

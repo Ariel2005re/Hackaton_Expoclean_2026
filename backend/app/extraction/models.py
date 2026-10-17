@@ -54,7 +54,7 @@ class ProposedSpaceGroup(BaseModel):
     unit_area_m2: Optional[float] = None
     total_area_m2: Optional[float] = None
     condition: Optional[str] = None  # bueno, regular, malo
-    cleaning_type: Optional[str] = None  # general, especializado
+    cleaning_type: Optional[str] = None  # general, especializado, ambos
     service_days: Optional[List[str]] = None
     visits_per_day: Optional[int] = None
     source_fragment: str = Field(description="Text snippet identifying the space")
