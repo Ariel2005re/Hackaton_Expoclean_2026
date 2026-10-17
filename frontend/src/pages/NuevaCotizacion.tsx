@@ -26,7 +26,17 @@ import {
 const message = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 const pretty = (value: unknown) =>
-  typeof value === "object" ? JSON.stringify(value) : String(value ?? "—");
+  value == null ? "Sin dato" : typeof value === "object" ? JSON.stringify(value) : String(value);
+const attributeLabel = (name: string) => ({
+  name: "Nombre", quantity: "Cantidad", unit_area_m2: "m² por unidad",
+  total_area_m2: "Superficie total m²", condition: "Estado",
+  cleaning_type: "Tipo de trabajo", visits_per_day: "Visitas por día",
+  service_days: "Días de servicio",
+} as Record<string, string>)[name] ?? name;
+const conditionLabels = {
+  explicit: "Explícito", derived: "Derivado", absent: "Ausente",
+  contradictory: "Contradictorio", human_corrected: "Corregido por el usuario",
+};
 
 export default function NuevaCotizacion() {
   const { id } = useParams();
@@ -141,6 +151,7 @@ export default function NuevaCotizacion() {
       if (!value.id) {
         try {
           localStorage.setItem(`mvp-web-text-${saved.id}`, text);
+          localStorage.removeItem("mvp-web-text-new");
         } catch {
           /* storage optional */
         }
@@ -652,7 +663,7 @@ export default function NuevaCotizacion() {
           <fieldset className="form-section">
             <legend>Propuesta en revisión</legend>
             <p>
-              {proposal.analysis.status}: {proposal.analysis.message}
+              {proposal.analysis.message}
             </p>
             {proposal.review.defective_groups.map((g, i) => (
               <p key={i} className="pendientes-list">
@@ -688,9 +699,9 @@ export default function NuevaCotizacion() {
                   <tbody>
                     {Object.entries(group.attributes).map(([name, attr]) => (
                       <tr key={name}>
-                        <td>{name}</td>
+                        <td>{attributeLabel(name)}</td>
                         <td>
-                          {pretty(attr.value)} · {attr.condition}
+                          {pretty(attr.value)} · {conditionLabels[attr.condition]}
                           {attr.operation && <small> · {attr.operation}</small>}
                           {attr.origin_values && (
                             <small>
@@ -717,7 +728,7 @@ export default function NuevaCotizacion() {
                           </button>
                           {correction?.groupId === group.id && correction.name === name && (
                             <div>
-                              <label>Nuevo valor de {name}
+                              <label>Nuevo valor de {attributeLabel(name)}
                                 <input autoFocus value={correction.value} onChange={(e) => setCorrection({ ...correction, value: e.target.value })} />
                               </label>
                               <button type="button" onClick={() => {
@@ -818,7 +829,7 @@ export default function NuevaCotizacion() {
                   ))}
                 </ul>
               )}
-              <PreviewDetails preview={preview} />
+              <PreviewDetails preview={preview} groupNames={Object.fromEntries(draft.groups.map((group) => [group.group_id, group.name]))} />
               <button
                 type="button"
                 disabled={!preview.is_emission_valid || busy}

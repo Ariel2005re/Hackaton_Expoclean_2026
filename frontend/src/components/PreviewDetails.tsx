@@ -5,7 +5,8 @@ const obj = (value: unknown): Record<string, unknown> =>
 const label = (value: unknown) => (value == null ? "—" : String(value));
 const money = (value: unknown) => value == null ? "—" : Number(value).toFixed(2);
 
-export default function PreviewDetails({ preview }: { preview: VistaPrevia }) {
+export default function PreviewDetails({ preview, groupNames = {} }: { preview: VistaPrevia; groupNames?: Record<string, string> }) {
+  const groupName = (id: string) => groupNames[id] || id;
   const calendar = obj(preview.calendar_summary);
   const price = obj(preview.pricing_summary);
   const efforts = Object.entries(preview.group_efforts ?? {});
@@ -33,7 +34,7 @@ export default function PreviewDetails({ preview }: { preview: VistaPrevia }) {
             {Object.entries(obj(calendar.group_interventions)).map(
               ([id, count]) => (
                 <li key={id}>
-                  Grupo {id}: {label(count)} intervenciones
+                  Grupo {groupName(id)}: {label(count)} intervenciones
                 </li>
               ),
             )}
@@ -64,7 +65,7 @@ export default function PreviewDetails({ preview }: { preview: VistaPrevia }) {
                     : "No incluido";
                 return (
                   <tr key={id}>
-                    <td>{id}</td>
+                    <td>{groupName(id)}</td>
                     <td>{label(group.physical_sqm)}</td>
                     <td>{detail(general)}</td>
                     <td>{detail(specialized)}</td>
@@ -95,7 +96,7 @@ export default function PreviewDetails({ preview }: { preview: VistaPrevia }) {
                   <td>
                     {line.scope === "compartido"
                       ? "Compartido"
-                      : `Grupo ${label(line.group_id)}`}
+                      : `Grupo ${groupName(label(line.group_id))}`}
                   </td>
                   <td>{label(line.recurrence_count)}</td>
                   <td>{money(line.rounded_total)}</td>
