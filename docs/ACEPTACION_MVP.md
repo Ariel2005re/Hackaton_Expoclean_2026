@@ -6,12 +6,15 @@ revisiones personales ni autoriza la fusión final a `main`.
 
 ## Resultado observado
 
-- PostgreSQL en Docker: **151 pruebas y 41 subpruebas aprobadas**. Incluye pruebas
+- PostgreSQL en Docker: **156 pruebas y 41 subpruebas aprobadas**. Incluye pruebas
   HTTP, persistencia real, cálculos, extracción controlada y emisión PDF.
 - Frontend integrado: **npm ci**, **20 pruebas** y **npm run build** correctos.
 - Instalación sobre volumen nuevo `mvp-acceptance-20261017`: migración y precarga
   ejecutada dos veces; inicialmente 149 pruebas + 41 subpruebas. La ampliación
   a 151 añade fallos HTTP de render y persistencia con rollback PostgreSQL.
+- Segunda instalación vacía `mvp-final-audit`: 152 + 41 aprobadas con sugerencia
+  RF-19. Tras cubrir extracción de ambos trabajos y su confirmación persistida,
+  la suite final pasó 156 + 41 en esa base aislada.
 - Flujos manual y asistido recorridos mediante navegador con descarga real.
 - Gemini real: una extracción sintética devolvió SUCCESS con un grupo revisable;
   otra solicitud desde React agotó 60 segundos. Se conservó texto/borrador y se
@@ -102,11 +105,25 @@ Comandos de reproducción en [README](../README.md). La ejecución frontend usa
 - Descargar la versión asistida anterior tras los cambios produce el mismo SHA-256:
   `74C15DAB439F56806B520E8F947B3E835BD432F82D7FFF8FFB01C6A5FC0CDD9E`.
 
-## Matriz de evidencia y auditoría pendiente
+## Correcciones finales de I09
+
+- RF-19: vista previa con horas base y dotación sugerida por tipo para todas las
+  visitas diarias, sin modificar lo elegido. Prueba de 3 horas × 2 visitas /
+  ventana de 2 horas recomienda 3 personas; aceptar 3 habilita emisión y conserva
+  costo. 3,01 horas requieren 4 personas. Sin horario válido no hay sugerencia.
+  Presentación comprobada en navegador con API real.
+- RF-04/RF-07/RF-12: la extracción conserva ambos trabajos con respaldo explícito,
+  incluida la forma «especializada». Confirmar activa ambos sin inventar superficie
+  especializada; prueba HTTP comprueba que sigue pendiente antes del PDF.
+- La clave configurada no aparece en los 128 archivos revisados (versionados y
+  build frontend); `.env` está ignorado. Las pruebas también comprueban errores
+  sin secretos. El escaneo no equivale a revisar todo el historial Git.
+
+## Matriz de evidencia
 
 Las rutas de pruebas siguientes son relativas al repositorio. La existencia de
-una prueba no sustituye inspeccionar su criterio observable. I09 sigue abierto
-hasta terminar la auditoría de los puntos indicados al final.
+una prueba no sustituye inspeccionar su criterio observable. Las aprobaciones
+personales y la fusión final se registran por separado de esta auditoría técnica.
 
 | RF | Escenario / resultado comprobado | Evidencia |
 | --- | --- | --- |
@@ -128,7 +145,7 @@ hasta terminar la auditoría de los puntos indicados al final.
 | RF-16 | Perfil/tarifa/factor alimentan preview, sin reescribir valores editados del borrador; empresa y plantilla editadas y recuperadas. | `test_editable_company_assumptions_feed_preview_without_changing_draft`; recorrido configuración completa. |
 | RF-17 | Etiquetas de ejemplo y referencia SERCOP, unidades separadas del rendimiento. | Configuración en navegador; prueba de persistencia de referencia. |
 | RF-18 | Horas por tipo, intervención y período, calendario e importes. | I07/I08; `test_estimation/test_effort.py`, `PreviewDetails.test.tsx`. |
-| RF-19 | Dotación reparte mismas horas; simultaneidad usa máximo; ajuste cambia cálculo. Falta mostrar sugerencia de dotación según ventana/visitas. | `test_estimation/test_effort.py` y `test_preview.py`; recorrido real de recursos. |
+| RF-19 | Dotación reparte mismas horas; simultaneidad usa máximo; ajuste cambia cálculo; sugerencia de dotación según ventana/visitas sin cambios automáticos. | `test_estimation/test_effort.py`, `test_suggested_staff_accounts_for_visits_without_changing_price`; recorrido real y componente frontend. |
 | RF-20 | Recurso propio por intervención, compartido por jornada, cantidad decimal. | `test_estimation/test_pricing.py`, `test_persistencia.py`; I07 compartido. |
 | RF-21 | Tabla esperada al centavo, margen/descuento/impuesto y subtotal positivo. | `test_estimation/test_pricing.py`; I07/I08. |
 | RF-22 | Guardar/recuperar incompletos y estado de revisión persistido. | I07/I08; `test_drafts_and_latest_review_can_be_reopened_without_browser_state`. |
@@ -147,9 +164,8 @@ hasta terminar la auditoría de los puntos indicados al final.
 
 ## Pendientes de cierre
 
-1. Completar sugerencia de dotación RF-19 y terminar auditoría I09 de cada
-   evidencia RF. La separación, ajustes, configuración y recuperación después
-   de recrear la API ya están comprobados.
+1. Mantener candidata, matriz y evidencias revisables. Los defectos técnicos
+   encontrados durante I09 están corregidos y verificados.
 2. Registrar revisiones cruzadas pendientes de A10, B09 y D13. Las revisiones
    técnicas C08/E08 realizadas por Codex constan en sus respectivos informes;
    no atribuir aprobación a personas que no la han dado.
@@ -162,8 +178,8 @@ hasta terminar la auditoría de los puntos indicados al final.
 
 - `npm ci` inicialmente falló por un `esbuild.exe` abierto por Vite. Tras detener
   las dos sesiones de desarrollo propias, instalación, 20 tests y build pasaron.
-- El último intento de reconstruir Docker falló resolviendo `registry-1.docker.io`.
-  Se conserva la imagen previamente construida y se recreó la API con ella.
-  La API se limita ahora a `127.0.0.1:8000` conforme al uso local del MVP.
+- Un intento de reconstruir Docker falló resolviendo `registry-1.docker.io`.
+  El reintento terminó correctamente y se recreó la API con la imagen actualizada.
+  La API se limita a `127.0.0.1:8000` conforme al uso local del MVP.
 - Advertencias de deprecación de React Router y Starlette no hicieron fallar
   las suites. No se presenta este informe como auditoría de dependencias.

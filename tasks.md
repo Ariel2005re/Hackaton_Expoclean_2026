@@ -145,10 +145,10 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 **Actualización de aceptación del 17-10-2026:** la candidata
 `codex/mvp-final-validation` reúne P1–P5 y las correcciones de aceptación. La rama
 `integration/mvp` sigue en `d07b94c`; `main` no se ha fusionado. Se verificaron
-151 pruebas backend y 41 subpruebas, instalación PostgreSQL vacía, 20 tests
+156 pruebas backend y 41 subpruebas, instalación PostgreSQL vacía, 20 tests
 frontend, `npm ci` y build. I07 e I08 tienen recorridos reales y PDFs descargados.
 Las aprobaciones cruzadas pendientes mantienen I01/I10 abiertos; no se infieren
-de las suites aprobadas. I09 sigue en auditoría. Detalles, RF y evidencias:
+de las suites aprobadas. I09 tiene matriz y evidencia técnica comprobada. Detalles:
 [docs/ACEPTACION_MVP.md](docs/ACEPTACION_MVP.md).
 
 **Registro anterior al cierre de P4:** `integration/mvp` incorporó las ramas P1,
@@ -184,7 +184,7 @@ cumplir sus criterios completos.
   **Hecho cuando:** borrador incompleto bloquea PDF, cotización completa lo descarga y una versión anterior mantiene precio tras cambiar tarifa.
 - [x] **I08 · 25 min · Dep.: I06 · RF-06–RF-11, RF-29–RF-31.** Ejecutar de extremo a extremo el camino asistido con Gemini simulado y su alternativa manual ante fallo.
   **Hecho cuando:** evidencia, contradicción y respuesta parcial pasan por revisión humana y el fallo no impide emitir manualmente.
-- [ ] **I09 · 25 min · Dep.: I07–I08 · RF-01–RF-34.** Revisar matriz RF → prueba, PDF de ejemplo y resultados de instalación limpia; asignar defectos a la rama dueña.
+- [x] **I09 · 25 min · Dep.: I07–I08 · RF-01–RF-34.** Revisar matriz RF → prueba, PDF de ejemplo y resultados de instalación limpia; asignar defectos a la rama dueña.
   **Hecho cuando:** RF-01–RF-34 tienen evidencia de prueba y no quedan defectos de aceptación sin resolver.
 - [ ] **I10 · 20 min · Dep.: I09 · RF-01–RF-34.** Solicitar revisión final de integración a dos personas distintas del integrador y fusionar a la rama base solo tras aprobarla.
   **Hecho cuando:** revisiones, pruebas y PDF descargado constan en la solicitud de fusión; la rama base pasa las mismas comprobaciones.

@@ -48,6 +48,12 @@ Los importes son USD. Una tarifa o rendimiento no configurados impiden emitir.
 
 `custom_surface_sqm` en `specialized_work` es obligatorio si está activo.
 `adjusted_hours_per_intervention` y `custom_state_factor` son ajustes opcionales.
+El factor pertenece al grupo y las horas ajustadas a cada trabajo. En
+`group_efforts[id].general` y `.specialized` se devuelven `estimated_base_hours`,
+`total_hours_per_intervention`, `assigned_workers`, `duration_hours` y
+`suggested_workers`. La sugerencia es el entero superior de horas por intervención
+× visitas diarias ÷ ventana diaria, mínimo uno; queda `null` sin horario válido.
+Es informativa y no cambia dotación, horas ni precio. Los equipos son simultáneos.
 Si tarifa, rendimiento, factor, margen o impuesto se omiten, se usa la
 configuración actual de la empresa, sin modificar el borrador almacenado.
 
@@ -72,6 +78,11 @@ configuración actual de la empresa, sin modificar el borrador almacenado.
 confirmado conserva `provenance` en el borrador. La ruta global `/extraction`
 permite validación y revisión sin persistir; la interfaz debe usar las rutas
 ligadas a cotización para no perder el estado.
+
+El atributo de propuesta `cleaning_type` admite `general`, `especializado` y
+`ambos` con respaldo explícito. Confirmar `ambos` activa ambos trabajos sin
+inventar superficie especializada, perfil, rendimientos ni tarifas; esos
+pendientes deben completarse antes de emitir.
 
 ## Versiones e historial
 

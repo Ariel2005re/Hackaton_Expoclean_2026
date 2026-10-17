@@ -187,6 +187,45 @@ class FailedExtraction:
         )
 
 
+def test_confirming_both_work_types_requires_specialized_surface_after_review():
+    """RF-04/07/12/13: extraction keeps both works without inventing their scope."""
+    from backend.app.extraction.service import ExtractionService
+
+    text = "2 oficinas de 35 m² en buen estado, limpieza general y especializada los lunes, 1 visita por día."
+
+    class BothWorksGemini:
+        def call_gemini(self, confirmed_text):
+            assert confirmed_text == text
+            return {"spaces": [{"name": "oficinas", "quantity": 2, "unit_area_m2": 35,
+                                "condition": "bueno", "cleaning_type": "ambos",
+                                "service_days": ["lunes"], "visits_per_day": 1,
+                                "source_fragment": text}]}
+
+    quote_id = f"it-{uuid4().hex}"
+    client = TestClient(app)
+    app.dependency_overrides[get_service] = lambda: ExtractionService(client=BothWorksGemini())
+    try:
+        assert client.post("/cotizaciones/", json={"id": quote_id}).status_code == 201
+        analyzed = client.post(f"/cotizaciones/{quote_id}/propuestas/analizar", json={
+            "text": text, "confirmed": True, "personal_data_warning_acknowledged": True,
+        }).json()
+        group = analyzed["review"]["revisable_groups"][0]
+        assert group["cleaning_type"] == "ambos" and group["can_be_confirmed"]
+        assert client.get(f"/cotizaciones/{quote_id}").json()["groups"] == []
+        confirmed = client.post(f"/cotizaciones/{quote_id}/propuestas/{analyzed['id']}/confirmar",
+                                json={"group_id": group["id"]})
+        assert confirmed.status_code == 200, confirmed.text
+        saved = client.get(f"/cotizaciones/{quote_id}").json()["groups"][0]
+        assert saved["general_work"]["enabled"] and saved["specialized_work"]["enabled"]
+        assert saved["specialized_work"].get("custom_surface_sqm") is None
+        preview = client.get(f"/cotizaciones/{quote_id}/preview").json()
+        assert not preview["is_emission_valid"]
+        assert any("superficie propia" in issue for issue in preview["pending_emission_issues"])
+    finally:
+        app.dependency_overrides.clear()
+        _cleanup(quote_id)
+
+
 def test_gemini_failure_preserves_text_and_empty_manual_draft():
     quote_id = f"it-{uuid4().hex}"
     client = TestClient(app)
