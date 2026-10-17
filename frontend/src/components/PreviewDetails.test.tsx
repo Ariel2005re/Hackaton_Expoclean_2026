@@ -20,6 +20,8 @@ it("RF-18 muestra horas por intervención y del período por tipo", () => {
               total_hours_per_intervention: 2,
               assigned_workers: 2,
               duration_hours: 1,
+              suggested_workers: 1,
+              estimated_base_hours: 2,
             },
             specialized: {
               surface_sqm: 20,
@@ -38,4 +40,5 @@ it("RF-18 muestra horas por intervención y del período por tipo", () => {
   expect(
     screen.getByText(/1 h por intervención · 3 h en el período/),
   ).toBeTruthy();
+  expect(screen.getByText(/2 personas.*Base estimada: 2 h.*Sugerencia para todas las visitas del día: 1 personas/)).toBeTruthy();
 });
