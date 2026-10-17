@@ -61,6 +61,12 @@ def update_draft(quote_id: str, payload: DraftPayload, db: Session = Depends(get
     return data
 
 
+@router.get("/")
+def list_drafts(db: Session = Depends(get_db)):
+    """Recover editable quotes independently of browser storage (RF-22, RF-28)."""
+    return [row.datos for row in db.query(CotizacionBorrador).order_by(CotizacionBorrador.id).all()]
+
+
 @router.get("/{quote_id}")
 def get_draft(quote_id: str, db: Session = Depends(get_db)):
     return _get_draft(db, quote_id).datos

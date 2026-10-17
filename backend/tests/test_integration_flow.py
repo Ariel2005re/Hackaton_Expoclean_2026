@@ -133,6 +133,39 @@ def test_assisted_review_persists_separately_and_manual_draft_survives():
         _cleanup(quote_id)
 
 
+def test_drafts_and_latest_review_can_be_reopened_without_browser_state():
+    """RF-06, RF-09, RF-22, RF-28: fresh clients recover persisted state."""
+    quote_id = f"it-{uuid4().hex}"
+    other_id = f"it-{uuid4().hex}"
+    client = TestClient(app)
+    app.dependency_overrides[get_service] = lambda: FakeExtraction()
+    try:
+        for identifier in (quote_id, other_id):
+            assert client.post("/cotizaciones/", json={"id": identifier}).status_code == 201
+        assert client.get(f"/cotizaciones/{quote_id}/propuestas/actual").status_code == 204
+        assert client.get("/cotizaciones/inexistente/propuestas/actual").status_code == 404
+        payload = {"text": "2 aulas de 40 m2", "confirmed": True,
+                   "personal_data_warning_acknowledged": True}
+        first = client.post(f"/cotizaciones/{quote_id}/propuestas/analizar", json=payload).json()
+        corrected = client.post(f"/cotizaciones/{quote_id}/propuestas/{first['id']}/corregir",
+                                json={"group_id": "proposal-1", "attribute_name": "unit_area_m2", "new_value": 45})
+        assert corrected.status_code == 200, corrected.text
+        fresh = TestClient(app)
+        assert quote_id in {d["id"] for d in fresh.get("/cotizaciones/").json()}
+        restored = fresh.get(f"/cotizaciones/{quote_id}/propuestas/actual").json()
+        assert restored["review"]["revisable_groups"][0]["unit_area_m2"] == 45
+        assert restored["review"]["original_text"] == payload["text"]
+        assert fresh.get(f"/cotizaciones/{other_id}/propuestas/actual").status_code == 204
+        second = client.post(f"/cotizaciones/{quote_id}/propuestas/analizar", json=payload).json()
+        assert second["id"] != first["id"]
+        assert fresh.get(f"/cotizaciones/{quote_id}/propuestas/actual").json()["id"] == second["id"]
+        assert fresh.get(f"/cotizaciones/{quote_id}").json()["groups"] == []
+    finally:
+        app.dependency_overrides.clear()
+        _cleanup(quote_id)
+        _cleanup(other_id)
+
+
 def test_sercop_profiles_keep_original_units_and_no_automatic_rate():
     client = TestClient(app)
     profiles = client.get("/config/perfiles").json()

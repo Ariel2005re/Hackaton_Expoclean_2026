@@ -18,7 +18,7 @@ Permitir a una persona de una empresa de limpieza preparar, calcular, guardar y 
 
 **RF-04.** Cuando el usuario añada espacios manualmente, el sistema deberá permitir crear y editar grupos iguales con nombre, cantidad, m² por unidad, días de la semana de servicio propios, visitas por día de servicio, estado de la infraestructura y perfil de referencia. El estado tendrá los valores bueno, regular y malo. Los días elegidos se repetirán durante el período, incluso si son feriados, sin exclusiones automáticas. Un grupo podrá tener trabajo general, especializado o ambos, con horas y costos separados; cuando tenga trabajo especializado, deberá permitir registrar la superficie total en m² atendida por ese trabajo en cada intervención. Zona y tareas podrán describirse en texto libre. **Por qué:** agrupar espacios equivalentes sin perder las variables del cálculo y hacer previsible el calendario.
 
-**RF-05.** Cuando los espacios difieran en estado, calendario, tipo de trabajo u otra condición relevante para el cálculo, el sistema deberá permitir separarlos en grupos distintos. **Por qué:** evitar ocultar excepciones en una estimación común.
+**RF-05.** Cuando los espacios difieran en estado, calendario, tipo de trabajo u otra condición relevante para el cálculo, el sistema deberá permitir separarlos en grupos distintos, conservando la cantidad de espacios y sin duplicar superficies especializadas ni horas ajustadas totales. Antes de aplicar una separación con recursos propios, deberá permitir revisar y confirmar su destino y cantidad por intervención en cada grupo resultante; cancelar conservará el grupo original. **Por qué:** evitar ocultar excepciones y alterar el alcance por una separación automática.
 
 **RF-06.** Cuando el usuario proporcione texto pegado o un TXT válido y confirme el envío, el sistema deberá pedir a Gemini una propuesta de grupos y atributos que permanezca en revisión hasta la confirmación humana. **Por qué:** acelerar la captura sin incorporar datos no verificados.
 
@@ -96,6 +96,8 @@ Permitir a una persona de una empresa de limpieza preparar, calcular, guardar y 
 - Afirmar que los perfiles SERCOP son tarifas vigentes o una verificación de cumplimiento normativo.
 
 ## Criterios de finalización
+
+La separación de RF-05/RF-20 se verifica con recursos propios y compartidos: el usuario confirma la asignación de los propios, los compartidos permanecen únicos y cancelar no modifica el borrador. Las cantidades de espacios, superficies especializadas y horas ajustadas conservan sus totales al separar.
 
 1. El camino manual permite crear, guardar, recuperar, completar y emitir una cotización sin Gemini. El asistido permite revisar y confirmar grupos antes de incorporarlos; ambos se verifican de extremo a extremo.
 2. Un texto con varios espacios muestra evidencia por atributo, distingue datos explícitos, derivados y ausentes, y exige resolver contradicciones. Una respuesta que incluya un grupo con nombre o tipo respaldado y otro sin identificación deja revisar el primero y señala el segundo sin incorporarlo. Al combinar o separar grupos se conserva el origen de cada atributo y se identifican las correcciones humanas; un nuevo análisis no duplica grupos confirmados.

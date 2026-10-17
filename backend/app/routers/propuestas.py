@@ -1,6 +1,6 @@
 """Persisted extraction review attached to a quote draft (RF-06–RF-11, RF-29–RF-31)."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -53,6 +53,16 @@ def analyze(quote_id: str, payload: AnalyzeSpacesPayload, db: Session = Depends(
     db.add(row)
     db.commit()
     db.refresh(row)
+    return {"id": row.id, "analysis": row.datos_extraidos, "review": row.estado_revision}
+
+
+@router.get("/actual")
+def current_proposal(quote_id: str, db: Session = Depends(get_db)):
+    """Resume the latest analysis, including failures, after reopening a draft."""
+    _draft(db, quote_id)
+    row = db.query(PropuestaIA).filter_by(cotizacion_id=quote_id).order_by(PropuestaIA.id.desc()).first()
+    if row is None:
+        return Response(status_code=204)
     return {"id": row.id, "analysis": row.datos_extraidos, "review": row.estado_revision}
 
 

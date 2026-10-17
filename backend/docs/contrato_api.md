@@ -9,6 +9,7 @@ de versiones vuelve a validar en el servidor.
 - `POST /cotizaciones/`: crea; `id` opcional (se genera UUID). Devuelve el borrador.
 - `PUT /cotizaciones/{id}`: reemplaza el borrador editable completo.
 - `GET /cotizaciones/{id}`: recupera el borrador.
+- `GET /cotizaciones/`: lista todos los borradores editables con el mismo contrato, ordenados por ID; devuelve `[]` si no existen. No depende del navegador.
 - `GET /cotizaciones/{id}/preview`: calendario, horas, líneas y
   `pending_emission_issues`; `is_emission_valid` controla la emisión.
 - `POST /clientes/`, `GET /clientes/?nombre=...`, `GET /clientes/{id}`.
@@ -56,6 +57,7 @@ configuración actual de la empresa, sin modificar el borrador almacenado.
   `personal_data_warning_acknowledged`. Solo `text` confirmado se envía a
   Gemini. Devuelve `id`, `analysis` y `review`; guarda el texto aun si falla.
 - `GET /cotizaciones/{id}/propuestas/{proposal_id}` recupera el estado.
+- `GET /cotizaciones/{id}/propuestas/actual`: devuelve `{id, analysis, review}` de la última propuesta (mayor ID), incluso si falló el análisis; 204 si no existe propuesta, 404 si no existe la cotización. La interfaz recupera texto y revisión sin insertar grupos.
 - `POST /cotizaciones/{id}/propuestas/{proposal_id}/{acción}` admite
   `corregir`, `combinar`, `separar`, `descartar`, `confirmar`.
 - El cuerpo de la acción contiene, según corresponda, `group_id`,
