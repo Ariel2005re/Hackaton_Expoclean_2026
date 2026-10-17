@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, JSON
 from sqlalchemy.orm import relationship
-from app.db.database import Base
+from backend.app.db.database import Base
 
 class Cliente(Base):
     __tablename__ = "clientes"
@@ -18,6 +18,8 @@ class CotizacionBorrador(Base):
     cliente_id = Column(Integer, ForeignKey("clientes.id"), nullable=True)
     periodo = Column(String, nullable=True) # Mensual, Semanal
     estado = Column(String, default="borrador")
+    # Contrato íntegro y editable; permite campos ausentes y valores por corregir.
+    datos = Column(JSON, nullable=False, default=dict)
     
     # Relaciones
     cliente = relationship("Cliente")

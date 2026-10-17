@@ -1,40 +1,38 @@
-from app.db.database import SessionLocal
-from app.models.config import Factor, PerfilRendimiento, Tarifa
+"""Idempotent examples and source references; never quote SERCOP as a live tariff."""
+
+from backend.app.db.database import SessionLocal
+from backend.app.models.config import Factor, PerfilRendimiento, Tarifa, EmpresaConfig
+
+REFERENCES = (
+    ("Oficinas", 1.13, "USD por metro cuadrado, sin IVA", "https://portal.compraspublicas.gob.ec/sercop/wp-content/uploads/2017/01/limpiezatipoI1.pdf"),
+    ("Campamentos", 2.05, "USD por m² mensual, sin IVA", "https://portal.compraspublicas.gob.ec/sercop/wp-content/uploads/2017/04/2.pdf"),
+    ("Instituciones educativas", 1.11, "USD por metro cuadrado, sin IVA", "https://portal.compraspublicas.gob.ec/sercop/wp-content/uploads/2016/03/ficha-tecnica-limpieza-educativas.pdf"),
+    ("Áreas externas", 0.64, "USD por metro cuadrado, sin IVA", "https://portal.compraspublicas.gob.ec/sercop/wp-content/uploads/2023/03/4_LIMPIEZA-AREA-EXTERNA.pdf"),
+)
+
 
 def seed_db():
-    db = SessionLocal()
-    
-    # Verificar si ya hay datos para no duplicar
-    if db.query(Factor).count() == 0:
-        # 1. Factores de dificultad/riesgo
-        factores = [
-            Factor(nombre="Estándar / Riesgo Bajo", valor=1.00),
-            Factor(nombre="Riesgo Medio / Industrial", valor=1.25),
-            Factor(nombre="Riesgo Alto / Biológico", valor=1.50)
-        ]
-        
-        # 2. Los 4 Perfiles SERCOP requeridos
-        perfiles = [
-            PerfilRendimiento(nombre="Limpieza General Oficinas", m2_por_hora=250.0, unidad="m2/hora", fuente="SERCOP", editable=True),
-            PerfilRendimiento(nombre="Limpieza Hospitalaria", m2_por_hora=150.0, unidad="m2/hora", fuente="SERCOP", editable=True),
-            PerfilRendimiento(nombre="Limpieza Industrial Bodegas", m2_por_hora=300.0, unidad="m2/hora", fuente="SERCOP", editable=True),
-            PerfilRendimiento(nombre="Limpieza Exteriores", m2_por_hora=450.0, unidad="m2/hora", fuente="SERCOP", editable=True)
-        ]
-
-        # 3. Tarifa base (Salario Básico)
-        tarifas = [
-            Tarifa(descripcion="SBU 2026 Ecuador", monto=470.00)
-        ]
-
-        db.add_all(factores)
-        db.add_all(perfiles)
-        db.add_all(tarifas)
+    with SessionLocal() as db:
+        if not db.query(EmpresaConfig).first():
+            db.add(EmpresaConfig(nombre="Mi empresa de limpieza", margen_porcentaje=0,
+                                 impuesto_porcentaje=0))
+        for name, value in (("bueno", 1.0), ("regular", 1.25), ("malo", 1.5)):
+            if not db.query(Factor).filter_by(nombre=name).first():
+                db.add(Factor(nombre=name, valor=value))
+        for name, value, unit, url in REFERENCES:
+            if not db.query(PerfilRendimiento).filter_by(nombre=name).first():
+                db.add(PerfilRendimiento(
+                    nombre=name, m2_por_hora=None, unidad="m²/hora de trabajo",
+                    fuente="SERCOP, ficha de referencia", editable=True,
+                    valor_original=value, unidad_original=unit, fuente_url=url,
+                    es_ejemplo=True,
+                ))
+        for name in ("Personal general", "Personal especializado"):
+            if not db.query(Tarifa).filter_by(descripcion=name).first():
+                db.add(Tarifa(descripcion=name, monto=None, unidad="USD/hora de trabajo",
+                              es_ejemplo=True))
         db.commit()
-        print("¡Datos iniciales (SERCOP, Factores y Tarifas) insertados correctamente!")
-    else:
-        print("Los datos ya estaban precargados.")
-        
-    db.close()
+
 
 if __name__ == "__main__":
     seed_db()

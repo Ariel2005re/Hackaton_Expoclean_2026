@@ -6,7 +6,9 @@ when rollback is called, including after a failed commit.
 """
 
 from dataclasses import dataclass
+from io import BytesIO
 from typing import Callable, Protocol
+from pypdf import PdfReader
 
 from .composition import QuotePdfSnapshot, compose_quote_pdf
 from .identity import VersionSnapshot
@@ -51,9 +53,19 @@ class EmissionService:
         if existing is not None:
             return existing
 
-        pdf = self._render_pdf(snapshot.visible.to_pdf_snapshot())
+        pdf = self._render_pdf(snapshot.visible.to_pdf_snapshot(
+            code=snapshot.code, issued_at=snapshot.issued_at,
+        ))
         if not isinstance(pdf, bytes) or not pdf.startswith(b"%PDF-"):
             raise ValueError("La generación no devolvió un PDF válido")
+        try:
+            reader = PdfReader(BytesIO(pdf), strict=True)
+            if not reader.pages:
+                raise ValueError("El PDF no contiene páginas")
+            for page in reader.pages:
+                page.get_contents()
+        except Exception as exc:
+            raise ValueError("La generación no devolvió un PDF recuperable") from exc
 
         transaction = self._store.begin()
         try:

@@ -248,7 +248,7 @@ def generate_estimation_preview(quote: QuoteDraftInput) -> EstimationPreviewResu
                     enabled=True,
                     productivity_sqm_per_hour=to_decimal(g.general_work.productivity_sqm_per_hour),
                     hourly_rate_usd=to_decimal(g.general_work.hourly_rate_usd),
-                    assigned_workers=g.general_work.assigned_workers or 1,
+                    assigned_workers=g.general_work.assigned_workers,
                     adjusted_hours_per_intervention=(
                         to_decimal(g.general_work.adjusted_hours_per_intervention)
                         if g.general_work.adjusted_hours_per_intervention is not None
@@ -281,7 +281,7 @@ def generate_estimation_preview(quote: QuoteDraftInput) -> EstimationPreviewResu
                     enabled=True,
                     productivity_sqm_per_hour=to_decimal(g.specialized_work.productivity_sqm_per_hour),
                     hourly_rate_usd=to_decimal(g.specialized_work.hourly_rate_usd),
-                    assigned_workers=g.specialized_work.assigned_workers or 1,
+                    assigned_workers=g.specialized_work.assigned_workers,
                     custom_surface_sqm=to_decimal(g.specialized_work.custom_surface_sqm),
                     adjusted_hours_per_intervention=(
                         to_decimal(g.specialized_work.adjusted_hours_per_intervention)

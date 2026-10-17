@@ -1,6 +1,7 @@
-from app.db.database import engine, Base
-from app.models import config
+"""Compatibility entry point for the unified migration."""
 
-print("Creando tablas en la base de datos...")
-Base.metadata.create_all(bind=engine)
-print("¡Migración inicial completada!")
+from backend.migrate import migrate
+
+
+if __name__ == "__main__":
+    migrate()

@@ -1,53 +1,71 @@
+"""Editable quote drafts and persisted estimation previews (RF-01–RF-23, RF-32–RF-33)."""
+
+from uuid import uuid4
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session, joinedload
-from app.db.database import get_db
-from app.models.cotizacion import CotizacionBorrador, Grupo, Trabajo, Recurso
-from app.schemas import CotizacionCreate, CotizacionResponse
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from backend.app.db.database import get_db
+from backend.app.integration import preview_for_draft, resolved_calculation_data
+from backend.app.models.cotizacion import CotizacionBorrador
 
 router = APIRouter(prefix="/cotizaciones", tags=["Cotizaciones"])
 
 
-@router.post("/", response_model=CotizacionResponse)
-def crear_borrador(cotizacion: CotizacionCreate, db: Session = Depends(get_db)):
-    # 1. Crear el borrador base
-    db_cotizacion = CotizacionBorrador(
-        id=cotizacion.id,
-        cliente_id=cotizacion.cliente_id,
-        periodo=cotizacion.periodo,
-    )
-    db.add(db_cotizacion)
-
-  
-    if cotizacion.grupos:
-        for g in cotizacion.grupos:
-            datos_grupo = g.model_dump(exclude={"trabajos", "recursos"})
-            nuevo_grupo = Grupo(**datos_grupo, cotizacion_id=cotizacion.id)
-            db.add(nuevo_grupo)
-            db.flush()  # para obtener nuevo_grupo.id antes del commit
-
-            for t in g.trabajos or []:
-                db.add(Trabajo(**t.model_dump(), grupo_id=nuevo_grupo.id))
-
-            for r in g.recursos or []:
-                db.add(Recurso(**r.model_dump(), grupo_id=nuevo_grupo.id))
-
-    db.commit()
-    return obtener_borrador(cotizacion.id, db)
+class DraftPayload(BaseModel):
+    id: str | None = None
+    cliente_id: int | None = None
+    client: dict | None = None
+    service: dict | None = None
+    groups: list[dict] = Field(default_factory=list)
+    resources: list[dict] = Field(default_factory=list)
+    margin_percentage: str | int | float | None = None
+    discount_usd: str | int | float = "0"
+    tax_percentage: str | int | float | None = None
 
 
-@router.get("/{cotizacion_id}", response_model=CotizacionResponse)
-def obtener_borrador(cotizacion_id: str, db: Session = Depends(get_db)):
-    # Reabrir un borrador debe reproducir exactamente los valores guardados
-    # (tasks.md A08/A09), incluyendo grupos, trabajos y recursos.
-    db_cotizacion = (
-        db.query(CotizacionBorrador)
-        .options(
-            joinedload(CotizacionBorrador.grupos).joinedload(Grupo.trabajos),
-            joinedload(CotizacionBorrador.grupos).joinedload(Grupo.recursos),
-        )
-        .filter(CotizacionBorrador.id == cotizacion_id)
-        .first()
-    )
-    if db_cotizacion is None:
+def _get_draft(db: Session, quote_id: str) -> CotizacionBorrador:
+    draft = db.get(CotizacionBorrador, quote_id)
+    if draft is None:
         raise HTTPException(status_code=404, detail="Borrador no encontrado")
-    return db_cotizacion
+    return draft
+
+
+@router.post("/", status_code=201)
+def create_draft(payload: DraftPayload, db: Session = Depends(get_db)):
+    data = payload.model_dump(mode="json")
+    data["id"] = data.get("id") or str(uuid4())
+    if db.get(CotizacionBorrador, data["id"]):
+        raise HTTPException(status_code=409, detail="Ya existe una cotización con ese id")
+    draft = CotizacionBorrador(
+        id=data["id"], cliente_id=data.get("cliente_id"),
+        periodo=(data.get("service") or {}).get("period_type"), datos=data,
+    )
+    db.add(draft)
+    db.commit()
+    return data
+
+
+@router.put("/{quote_id}")
+def update_draft(quote_id: str, payload: DraftPayload, db: Session = Depends(get_db)):
+    draft = _get_draft(db, quote_id)
+    if payload.id and payload.id != quote_id:
+        raise HTTPException(status_code=400, detail="El id del borrador no puede cambiar")
+    data = payload.model_dump(mode="json")
+    data["id"] = quote_id
+    draft.datos = data
+    draft.cliente_id = data.get("cliente_id")
+    draft.periodo = (data.get("service") or {}).get("period_type")
+    db.commit()
+    return data
+
+
+@router.get("/{quote_id}")
+def get_draft(quote_id: str, db: Session = Depends(get_db)):
+    return _get_draft(db, quote_id).datos
+
+
+@router.get("/{quote_id}/preview")
+def get_preview(quote_id: str, db: Session = Depends(get_db)):
+    return preview_for_draft(resolved_calculation_data(_get_draft(db, quote_id).datos, db))

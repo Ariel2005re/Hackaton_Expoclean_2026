@@ -43,7 +43,7 @@ class VisibleQuote:
             total=quote.total,
         )
 
-    def to_pdf_snapshot(self) -> QuotePdfSnapshot:
+    def to_pdf_snapshot(self, *, code: str | None = None, issued_at: date | None = None) -> QuotePdfSnapshot:
         """Pass only customer-facing values to the PDF composer."""
         return QuotePdfSnapshot(
             company=self.company,
@@ -55,6 +55,8 @@ class VisibleQuote:
             subtotal=self.subtotal,
             tax=self.tax,
             total=self.total,
+            code=code,
+            issued_at=issued_at,
         )
 
 

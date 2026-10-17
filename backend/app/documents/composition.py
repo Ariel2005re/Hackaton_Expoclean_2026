@@ -5,6 +5,7 @@ version identity, and persistence belong to later tasks.
 """
 
 from dataclasses import dataclass, field
+from datetime import date
 from decimal import Decimal
 from html import escape
 from io import BytesIO
@@ -44,6 +45,8 @@ class QuotePdfSnapshot:
     subtotal: Decimal
     tax: Decimal
     total: Decimal
+    code: str | None = None
+    issued_at: date | None = None
     # RF-21 values may accompany the snapshot for internal review. The PDF
     # renderer below selects commercial fields explicitly and never reads this.
     internal_calculation: Mapping[str, str] = field(default_factory=dict, repr=False)
@@ -145,6 +148,8 @@ def compose_quote_pdf(snapshot: QuotePdfSnapshot) -> bytes:
         _paragraph(snapshot.company, _LABEL),
         Spacer(1, 3 * mm),
         _paragraph("COTIZACIÓN DE SERVICIO", _TITLE),
+        *([_paragraph(f"Código: {snapshot.code} · Fecha de emisión: {snapshot.issued_at.isoformat()}")]
+          if snapshot.code and snapshot.issued_at else []),
         HRFlowable(width="100%", thickness=1.2, color=_ACCENT),
         _paragraph("Cliente", _SECTION),
         _paragraph(snapshot.client),

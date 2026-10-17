@@ -1,138 +1,84 @@
-# Contrato de la API - Hackathon Expo Clean 2026
+# Contrato API integrado del backend
 
-Este documento define las estructuras JSON exactas que usarán el Frontend y el
-Backend para comunicarse. Cubre los siete objetos del contrato de integración
-acordado en `tasks.md`: borrador, grupo, trabajo, recurso, vista previa,
-propuesta IA y versión. Los ejemplos son mínimos y editables; no son valores
-de producción.
+Autoridad funcional: `specs/001-hackaton/spec.md` (RF-01–RF-34). Los campos del
+borrador pueden quedar vacíos. La vista previa decide si es emitible; el POST
+de versiones vuelve a validar en el servidor.
 
-## Borrador (incluye grupo, trabajo y recurso)
+## Borradores y cálculo
 
-`POST /cotizaciones/` y `GET /cotizaciones/{id}`
+- `POST /cotizaciones/`: crea; `id` opcional (se genera UUID). Devuelve el borrador.
+- `PUT /cotizaciones/{id}`: reemplaza el borrador editable completo.
+- `GET /cotizaciones/{id}`: recupera el borrador.
+- `GET /cotizaciones/{id}/preview`: calendario, horas, líneas y
+  `pending_emission_issues`; `is_emission_valid` controla la emisión.
+- `POST /clientes/`, `GET /clientes/?nombre=...`, `GET /clientes/{id}`.
+- `/config/empresa`, `/config/perfiles`, `/config/factores`, `/config/tarifas`
+  y `/config/plantillas` proporcionan referencias y supuestos editables.
+
+Ejemplo de borrador completo mínimo. Los recursos de grupo usan `scope: "grupo"`
+y `group_id`; los compartidos usan `scope: "compartido"` y se cobran por jornada.
+Los importes son USD. Una tarifa o rendimiento no configurados impiden emitir.
 
 ```json
 {
   "id": "borr-1234",
-  "cliente_id": 999,
-  "periodo": "Mensual",
-  "estado": "borrador",
-  "grupos": [
-    {
-      "id": 1,
-      "nombre": "Oficinas Principales",
-      "cantidad": 1,
-      "superficie_fisica": 150.0,
-      "dias_semanales": 5,
-      "visitas_diarias": 1,
-      "estado_confirmacion": "confirmado",
-      "trabajos": [
-        {
-          "tipo": "general",
-          "superficie_usada": 150.0,
-          "horas_estimadas": 4.5,
-          "personas": 1
-        }
-      ],
-      "recursos": [
-        {
-          "tipo": "propio",
-          "id_insumo": 101,
-          "cantidad": 2.5,
-          "costo_unitario": 18.50
-        }
-      ]
-    }
-  ]
-}
-```
-
-Un borrador admite campos vacíos: `cliente_id`, `periodo` y `grupos` pueden
-omitirse o llegar vacíos y el borrador igual se guarda (RF-22).
-
-## Vista previa
-
-Generada por P2 (`feature/mvp-estimation`) a partir de un borrador. P1 no la
-persiste; se define aquí solo como referencia de integración.
-
-```json
-{
-  "cotizacion_id": "borr-1234",
-  "calendario": {
-    "dias_semanales": 5,
-    "visitas_diarias": 1,
-    "horas_totales_mes": 90.0
+  "cliente_id": null,
+  "client": {"name": "Cliente", "service_address": "Quito, Av. 10"},
+  "service": {
+    "infrastructure_type": "Oficinas", "cleaning_type": "Limpieza general",
+    "start_date": "2026-11-02", "period_type": "semanal",
+    "start_time": "08:00:00", "end_time": "16:00:00"
   },
-  "lineas": [
-    {
-      "concepto": "Mano de obra - Oficinas Principales",
-      "cantidad": 90.0,
-      "unidad": "hora",
-      "costo_unitario": 2.94,
-      "subtotal": 264.60
-    }
-  ],
-  "total": 264.60,
-  "pendientes": [
-    "Falta dirección del servicio para poder emitir el PDF"
-  ]
+  "groups": [{
+    "group_id": "oficinas", "name": "Oficinas", "units_count": 2,
+    "sqm_per_unit": "50", "service_days": ["lunes", "miércoles"],
+    "visits_per_day": 1, "state": "bueno", "profile_id": "1",
+    "zone": "Planta baja", "tasks_description": "Pisos y mesas",
+    "general_work": {"enabled": true, "assigned_workers": 1,
+      "productivity_sqm_per_hour": "50", "hourly_rate_usd": "10"},
+    "specialized_work": {"enabled": false}
+  }],
+  "resources": [{"resource_id": "r1", "description": "Detergente",
+    "kind": "insumo", "scope": "compartido", "quantity": "0.5",
+    "unit_cost_usd": "2.00", "unit": "litro"}],
+  "margin_percentage": "10", "discount_usd": "1", "tax_percentage": "15"
 }
 ```
 
-`pendientes` es la lista de datos obligatorios que faltan para emitir un PDF
-(por ejemplo nombre del cliente o dirección del servicio, ver AGENTS.md).
+`custom_surface_sqm` en `specialized_work` es obligatorio si está activo.
+`adjusted_hours_per_intervention` y `custom_state_factor` son ajustes opcionales.
+Si tarifa, rendimiento, factor, margen o impuesto se omiten, se usa la
+configuración actual de la empresa, sin modificar el borrador almacenado.
 
-## Propuesta IA
+## Gemini y revisión humana
 
-Generada por P3 (`feature/mvp-gemini`) a partir de texto pegado o TXT.
-Cada atributo propuesto conserva su valor, estado y el fragmento de texto
-que lo respalda; los atributos sin respaldo quedan vacíos.
+- `POST /cotizaciones/{id}/propuestas/analizar` recibe `text`, `confirmed` y
+  `personal_data_warning_acknowledged`. Solo `text` confirmado se envía a
+  Gemini. Devuelve `id`, `analysis` y `review`; guarda el texto aun si falla.
+- `GET /cotizaciones/{id}/propuestas/{proposal_id}` recupera el estado.
+- `POST /cotizaciones/{id}/propuestas/{proposal_id}/{acción}` admite
+  `corregir`, `combinar`, `separar`, `descartar`, `confirmar`.
+- El cuerpo de la acción contiene, según corresponda, `group_id`,
+  `attribute_name`, `new_value`, `group_id_1`, `group_id_2`, `split_quantities`.
+  Solo `confirmar` incorpora el grupo al borrador. Un reanálisis crea otra
+  revisión y no modifica grupos confirmados.
 
-```json
-{
-  "id": 1,
-  "cotizacion_id": "borr-1234",
-  "estado": "revisable",
-  "texto_original": "Oficina de 150 m2, limpieza 5 veces por semana...",
-  "datos_extraidos": {
-    "superficie_fisica": {
-      "valor": 150.0,
-      "estado": "revisable",
-      "fragmento": "Oficina de 150 m2"
-    },
-    "dias_semanales": {
-      "valor": 5,
-      "estado": "revisable",
-      "fragmento": "limpieza 5 veces por semana"
-    },
-    "direccion": {
-      "valor": null,
-      "estado": "sin_respaldo",
-      "fragmento": null
-    }
-  }
-}
-```
+`review.revisable_groups[].attributes` conserva por atributo `value`,
+`condition` (`explicit`, `derived`, `absent`, `contradictory`,
+`human_corrected`), `source_fragment`, `operation`, `origin_values` y
+`conflicting_values`. Los defectuosos se presentan aparte. El grupo
+confirmado conserva `provenance` en el borrador. La ruta global `/extraction`
+permite validación y revisión sin persistir; la interfaz debe usar las rutas
+ligadas a cotización para no perder el estado.
 
-`estado` por propuesta es `revisable`, `confirmada` o `rechazada`; por
-atributo dentro de `datos_extraidos`, `revisable` o `sin_respaldo`.
+## Versiones e historial
 
-## Versión (PDF inmutable)
+- `POST /cotizaciones/{id}/versiones` emite o devuelve una versión equivalente.
+  Responde `code`, `issued_at`, `total_usd`, `pdf_url`.
+- `GET /historial?query=...` busca código, cliente y servicio.
+- `GET /cotizaciones/{id}/versiones/{code}/pdf` descarga los bytes guardados.
 
-Generada por P4 (`feature/mvp-pdf-history`) al emitir un borrador completo.
-
-```json
-{
-  "id": "VER-1234-A",
-  "borrador_id": "borr-1234",
-  "fecha_emision": "2026-10-16T15:00:00Z",
-  "pdf_url": "/pdfs/VER-1234-A.pdf",
-  "total_congelado": 264.60,
-  "datos_inmutables": {
-    "cliente": { "nombre": "Acme Cia Ltda", "direccion": "Av. Siempre Viva 123" },
-    "grupos": "... copia completa de grupos/trabajos/recursos al momento de emitir ..."
-  }
-}
-```
-
-`datos_inmutables` y `total_congelado` nunca cambian aunque las tarifas o
-factores se editen después (RF-25 a RF-27, RF-29 a RF-31).
+La identidad de la versión usa datos comerciales visibles y valores de cálculo;
+excluye código y fecha. El PDF, la identidad y la instantánea se confirman en
+una transacción. Los precios SERCOP en `/config/perfiles` llevan fuente,
+valor y unidad originales; nunca se convierten automáticamente en precio final.

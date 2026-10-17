@@ -122,6 +122,15 @@ class EmissionServiceTests(unittest.TestCase):
         self.assertEqual(store.versions, [])
         self.assertEqual(store.draft["status"], "editable")
 
+    def test_pdf_with_valid_header_but_corrupt_structure_is_not_persisted(self):
+        store = FakeStore()
+        with self.assertRaisesRegex(ValueError, "PDF"):
+            EmissionService(store, render_pdf=lambda _: b"%PDF-corrupt").emit(
+                self.snapshot, quote_id="draft-1"
+            )
+        self.assertEqual(store.transactions, 0)
+        self.assertEqual(store.versions, [])
+
     def test_stage_failure_rolls_back_without_partial_version(self):
         store = FakeStore(fail_stage=True)
 

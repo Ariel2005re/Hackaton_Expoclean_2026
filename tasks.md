@@ -142,6 +142,17 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 ## Integración, pruebas conjuntas y fusión final
 
+**Estado observado el 17-10-2026:** `integration/mvp` incorporó las ramas P1,
+P2, P3 y P5 desde `main` 91bde0c. La rama P4 continúa sin `frontend/`.
+La integración backend tiene contrato actualizado en
+`backend/docs/contrato_api.md`, persistencia PostgreSQL, vista previa,
+propuestas revisables y PDF versionado. La suite conjunta pasó 143 pruebas
+y 41 subpruebas, incluidas cinco pruebas de API con PostgreSQL; el caso de
+PDF con cabecera válida y estructura corrupta ya no crea versión. Estas
+pruebas no sustituyen la revisión cruzada pendiente de A10/B09 ni los
+recorridos I07–I08 con interfaz React. I01–I10 permanecen abiertos hasta
+cumplir sus criterios completos.
+
 **Rama:** `integration/mvp`, creada desde el commit base. La persona que integra no modifica las ramas ajenas; cualquier corrección sustancial vuelve al dueño y a su revisión. Cada paso también dura menos de 30 minutos.
 
 - [ ] **I01 · 20 min · Dep.: A10, B09, C08, D13, E08 · RF-01–RF-34.** Verificar que las cinco ramas tienen pruebas locales aprobadas y revisión cruzada registrada.

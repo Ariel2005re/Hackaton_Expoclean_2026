@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
-from app.db.database import get_db
-from app.models.cotizacion import Cliente
-from app.schemas import ClienteCreate, ClienteResponse
+from backend.app.db.database import get_db
+from backend.app.models.cotizacion import Cliente
+from backend.app.schemas import ClienteCreate, ClienteResponse
 
 router = APIRouter(prefix="/clientes", tags=["Clientes"])
 
