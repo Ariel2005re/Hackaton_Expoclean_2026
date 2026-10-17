@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.extraction.client import GeminiExtractionClient
 from backend.app.extraction.exceptions import (
+    GeminiError,
     GeminiQuotaExceededError,
     GeminiRejectionError,
     GeminiTimeoutError,
@@ -36,6 +37,16 @@ def create_confirmed_group(name: str) -> ProposedSpaceGroup:
 
 class TestDistinguishableStatusesAndPreservation:
     """Verifies that success, partial, rejection, and timeout deliver distinct statuses without altering confirmed groups (C06)."""
+
+    def test_model_rejection_preserves_text_and_exposes_only_error_code(self):
+        mock_client = MagicMock(spec=GeminiExtractionClient)
+        mock_client.call_gemini.side_effect = GeminiError(message="detalle privado", code="GEMINI_HTTP_404")
+        response = ExtractionService(client=mock_client).analyze_description(ExtractionInputRequest(
+            text="Dos oficinas", confirmed=True, personal_data_warning_acknowledged=True))
+        assert response.error_code == "GEMINI_HTTP_404"
+        assert response.original_text == "Dos oficinas"
+        assert response.fallback_to_manual
+        assert "detalle privado" not in response.message
 
     def test_status_success_preserves_confirmed_groups(self):
         existing_confirmed = [create_confirmed_group("oficinas planta baja")]

@@ -12,6 +12,7 @@ from backend.app.extraction.client import GeminiExtractionClient
 from backend.app.extraction.exceptions import (
     ConfirmationRequiredError,
     ExtractionValidationError,
+    GeminiError,
     GeminiQuotaExceededError,
     GeminiRejectionError,
     GeminiTimeoutError,
@@ -109,6 +110,15 @@ class ExtractionService:
                 message=exc.message,
                 error_code=exc.code,
                 warnings=["La IA devolvió una respuesta no utilizable. Puede continuar mediante el formulario manual."],
+            )
+        except GeminiError as exc:
+            return ExtractionServiceResponse(
+                status=AnalysisStatus.UNAVAILABLE,
+                original_text=request.text,
+                confirmed_groups=confirmed_groups,
+                fallback_to_manual=True,
+                message=f"Gemini rechazó la configuración o solicitud ({exc.code}). Puede continuar manualmente.",
+                error_code=exc.code,
             )
         except Exception:
             return ExtractionServiceResponse(
