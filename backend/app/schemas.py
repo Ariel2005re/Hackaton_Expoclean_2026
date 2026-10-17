@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class PerfilResponse(BaseModel):
     id: int
@@ -22,3 +22,14 @@ class ClienteResponse(ClienteBase):
     id: int
     class Config:
         from_attributes = True
+
+class GrupoCreate(BaseModel):
+    nombre: Optional[str] = None
+    cantidad: int = 1
+    superficie_fisica: Optional[float] = None
+    
+class CotizacionCreate(BaseModel):
+    id: str
+    cliente_id: Optional[int] = None
+    periodo: Optional[str] = None
+    grupos: Optional[List[GrupoCreate]] = []
