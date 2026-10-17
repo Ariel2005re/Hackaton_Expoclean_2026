@@ -8,7 +8,7 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/cleanexpo
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.8-flash}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.5-flash-lite}
       - GEMINI_TIMEOUT_SECONDS=${GEMINI_TIMEOUT_SECONDS:-60}
     depends_on:
       db:

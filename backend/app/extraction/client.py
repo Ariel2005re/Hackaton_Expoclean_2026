@@ -30,7 +30,7 @@ from backend.app.extraction.validator import validate_extraction_request
 logger = logging.getLogger("extraction.gemini")
 
 DEFAULT_TIMEOUT_SECONDS: float = 60.0
-DEFAULT_MODEL: str = "gemini-3.8-flash"
+DEFAULT_MODEL: str = "gemini-3.5-flash-lite"
 GEMINI_API_URL: str = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 SYSTEM_PROMPT = """Eres un asistente especializado en extracción de datos para cotizaciones de empresas de limpieza comercial en Ecuador.
