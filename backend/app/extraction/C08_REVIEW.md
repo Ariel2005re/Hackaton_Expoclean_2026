@@ -1,5 +1,9 @@
 # C08 · Pruebas y revisión de la rama Gemini
 
+## Actualización de integración — 2026-10-17
+
+Google aceptó la clave, pero `gemini-2.5-flash` devolvió HTTP 404 indicando que ya no está disponible para esta cuenta. La misma descripción sintética funcionó con `gemini-3.8-flash` y timeout de 60 segundos: SUCCESS, un grupo revisable y cero defectuosos. Modelo y timeout se configuran ahora mediante `GEMINI_MODEL` y `GEMINI_TIMEOUT_SECONDS`, con esos valores por defecto. Los rechazos HTTP conservan un código identificable sin publicar el detalle privado del proveedor. Verificación local: 88 pruebas aprobadas. Revisión técnica de Codex; la prueba real no sustituye el recorrido de interfaz I08.
+
 Fecha: 2026-10-17. Rama: `feature/mvp-gemini`. Revisión realizada por Codex en sustitución de P2 por instrucción expresa del usuario. P2 no ha revisado esta rama.
 
 ## Ejecución reproducible

@@ -29,8 +29,8 @@ from backend.app.extraction.validator import validate_extraction_request
 
 logger = logging.getLogger("extraction.gemini")
 
-DEFAULT_TIMEOUT_SECONDS: float = 20.0
-DEFAULT_MODEL: str = "gemini-2.5-flash"
+DEFAULT_TIMEOUT_SECONDS: float = 60.0
+DEFAULT_MODEL: str = "gemini-3.8-flash"
 GEMINI_API_URL: str = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 SYSTEM_PROMPT = """Eres un asistente especializado en extracción de datos para cotizaciones de empresas de limpieza comercial en Ecuador.
@@ -80,12 +80,14 @@ class GeminiConfig:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model_name: str = DEFAULT_MODEL,
-        timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+        model_name: Optional[str] = None,
+        timeout_seconds: Optional[float] = None,
     ):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY", "")
-        self.model_name = model_name
-        self.timeout_seconds = timeout_seconds
+        self.model_name = model_name or os.getenv("GEMINI_MODEL") or DEFAULT_MODEL
+        self.timeout_seconds = timeout_seconds if timeout_seconds is not None else float(os.getenv("GEMINI_TIMEOUT_SECONDS", str(DEFAULT_TIMEOUT_SECONDS)))
+        if self.timeout_seconds <= 0:
+            raise ValueError("GEMINI_TIMEOUT_SECONDS debe ser positivo")
 
     def __repr__(self) -> str:
         # Guarantee key is never shown in repr

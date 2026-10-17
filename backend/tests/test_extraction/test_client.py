@@ -27,6 +27,15 @@ SECRET_KEY = "AIzaSySecretApiKeyForGemini12345"
 class TestApiKeySecurityAndRedaction:
     """Verifies that the API key never appears in representations, logs, or exceptions (RF-29)."""
 
+    def test_model_and_timeout_are_configurable_without_code_changes(self, monkeypatch):
+        monkeypatch.setenv("GEMINI_MODEL", "modelo-configurado")
+        monkeypatch.setenv("GEMINI_TIMEOUT_SECONDS", "45")
+        config = GeminiConfig(api_key=SECRET_KEY)
+        assert config.model_name == "modelo-configurado"
+        assert config.timeout_seconds == 45
+        assert GeminiConfig(model_name="explicito", timeout_seconds=10).model_name == "explicito"
+        assert SECRET_KEY not in repr(config)
+
     def test_config_repr_and_str_mask_api_key(self):
         config = GeminiConfig(api_key=SECRET_KEY)
         assert SECRET_KEY not in repr(config)
