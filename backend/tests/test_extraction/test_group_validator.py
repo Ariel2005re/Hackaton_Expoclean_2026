@@ -12,6 +12,23 @@ from backend.app.extraction.models import AttributeCondition
 class TestProposedGroupIdentification:
     """Verifies that a proposal is revisable only if it identifies a space backed by text (RF-09, RF-29)."""
 
+    @pytest.mark.parametrize("kind, fragment, expected", [
+        ("ambos", "2 oficinas con limpieza general y especializada", "ambos"),
+        ("ambos", "2 oficinas con limpieza general", None),
+        ("especializado", "2 oficinas con limpieza especializada", "especializado"),
+    ])
+    def test_work_types_require_explicit_support(self, kind, fragment, expected):
+        """RF-04/07/12: both works are representable, never inferred from just one."""
+        group, defective = validate_proposed_group({
+            "name": "oficinas", "quantity": 2,
+            "cleaning_type": kind, "source_fragment": fragment,
+        })
+        assert defective is None
+        assert group.cleaning_type == expected
+        assert group.attributes["cleaning_type"].condition == (
+            AttributeCondition.EXPLICIT if expected else AttributeCondition.ABSENT
+        )
+
     def test_valid_identifiable_group_is_revisable(self):
         raw_group = {
             "name": "oficinas",

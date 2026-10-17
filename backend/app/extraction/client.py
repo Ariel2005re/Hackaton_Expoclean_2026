@@ -52,7 +52,7 @@ Esquema JSON requerido:
       "unit_area_m2": 35.0,
       "total_area_m2": 280.0,
       "condition": "bueno" | "regular" | "malo" | null,
-      "cleaning_type": "general" | "especializado" | null,
+      "cleaning_type": "general" | "especializado" | "ambos" | null,
       "service_days": ["lunes", "miércoles"] | null,
       "visits_per_day": 1 | null,
       "source_fragment": "fragmento exacto del texto de origen",
