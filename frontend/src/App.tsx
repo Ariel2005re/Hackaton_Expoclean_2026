@@ -12,6 +12,7 @@ export default function App() {
         <Route index element={<Navigate to="/nueva" replace />} />
         <Route path="nueva" element={<NuevaCotizacion />} />
         <Route path="borradores" element={<Borradores />} />
+        <Route path="borradores/:id" element={<NuevaCotizacion />} />
         <Route path="configuracion" element={<Configuracion />} />
         <Route path="historial" element={<Historial />} />
       </Route>
