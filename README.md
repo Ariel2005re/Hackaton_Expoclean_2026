@@ -13,5 +13,5 @@ Contrato de borradores, propuestas, vista previa e historial:
 [`backend/docs/contrato_api.md`](backend/docs/contrato_api.md). Para pruebas:
 `docker compose exec -T api python -m pytest backend/tests backend/app/documents/tests -q -p no:cacheprovider`.
 
-`feature/mvp-web` aún no incorpora la interfaz; la integración queda en esta
-rama hasta completar las verificaciones I06–I10.
+`feature/mvp-web` ya contiene archivos iniciales de interfaz; la integración
+queda en esta rama hasta completar y verificar I06–I10.

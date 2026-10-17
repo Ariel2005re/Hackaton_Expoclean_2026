@@ -143,13 +143,17 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 ## Integración, pruebas conjuntas y fusión final
 
 **Estado observado el 17-10-2026:** `integration/mvp` incorporó las ramas P1,
-P2, P3 y P5 desde `main` 91bde0c. La rama P4 continúa sin `frontend/`.
+P2, P3 y P5 desde `main` 91bde0c. La rama P4 ya contiene archivos iniciales
+de `frontend/`, aún sin integración ni pruebas conjuntas.
 La integración backend tiene contrato actualizado en
 `backend/docs/contrato_api.md`, persistencia PostgreSQL, vista previa,
-propuestas revisables y PDF versionado. La suite conjunta pasó 143 pruebas
-y 41 subpruebas, incluidas cinco pruebas de API con PostgreSQL; el caso de
-PDF con cabecera válida y estructura corrupta ya no crea versión. Estas
-pruebas no sustituyen la revisión cruzada pendiente de A10/B09 ni los
+propuestas revisables y PDF versionado. Tras incorporar la actualización A09/A10
+de P1, la suite conjunta pasó 146 pruebas y 41 subpruebas, incluidas ocho
+pruebas de API con PostgreSQL. En la rama P1 aislada pasaron dos de tres
+pruebas; la tercera leía una sesión SQLAlchemy que retenía el valor antiguo.
+Sus tres escenarios se adaptaron al contrato vigente y pasan en integración.
+El caso de PDF con cabecera válida y estructura corrupta ya no crea versión. Estas
+pruebas no sustituyen la revisión de P5 indicada en A10 ni B09 ni los
 recorridos I07–I08 con interfaz React. I01–I10 permanecen abiertos hasta
 cumplir sus criterios completos.
 
