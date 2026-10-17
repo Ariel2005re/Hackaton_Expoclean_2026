@@ -2,6 +2,26 @@
 
 ## Seguimiento de correcciones — 2026-10-17
 
+### Aceptación de la candidata integrada
+
+Los cuatro hallazgos originales están corregidos. La candidata además usa
+controles de corrección/separación dentro de la página, etiquetas en español,
+nombres de grupo en vista previa e importes con dos decimales. Se comprobó que
+una cotización nueva no hereda versiones ni el texto de un borrador ya guardado.
+`npm ci`, **20 tests** y `npm run build` pasaron en el checkout integrado.
+
+I07 recorrió captura manual → PostgreSQL → PDF, nueva versión y reversión sin
+duplicados. I08 recorrió propuesta parcial, derivación, contradicción, corrección,
+descarte, separación, combinación, confirmación y reanálisis sin duplicar, hasta
+PDF real. Un timeout real de Gemini permitió terminar manualmente y descargar PDF.
+La extracción controlada de I08 sustituye únicamente al proveedor externo.
+
+Evidencia detallada: `docs/ACEPTACION_MVP.md` en la candidata de integración.
+**D13/I01 siguen pendientes de aprobación independiente; este seguimiento es una
+revisión técnica de Codex y no atribuye aprobación personal a P3.**
+
+### Registro previo (18 pruebas)
+
 Implementados los cuatro cambios: confirmación consumida por envío, recuperación de propuesta y borradores desde API, horas acumuladas por tipo y separación con asignación explícita de recursos. La separación conserva también superficie especializada y horas ajustadas. Se corrigió además el tipo enviado al corregir atributos numéricos ausentes o calendarios y el guardado previo a confirmar propuestas. Se añadieron pruebas de esos comportamientos (18 pruebas frontend en total). Revisión técnica de Codex; pendiente de recorrido real I07–I08 y de aprobación independiente. Los hallazgos de abajo describen la versión original `82160c9`.
 
 **Fecha:** 2026-10-17  
@@ -26,4 +46,5 @@ Implementados los cuatro cambios: confirmación consumida por envío, recuperaci
 - `npm run build` mediante el mismo runtime: **compilación TypeScript y build Vite correctos**.
 - Las pruebas de emisión y Gemini del frontend usan respuestas controladas. La aceptación de extremo a extremo con Gemini, PostgreSQL y PDF real sigue en I07–I09; RF-28 sigue limitado por la ausencia de un listado persistente de borradores en la API.
 
-**Estado de revisión:** pendiente de correcciones y nueva comprobación. No marcar D13 ni I01 como aprobadas con este informe.
+**Estado de la revisión original:** requería correcciones. Consultar el seguimiento
+superior para el estado actual; no marcar D13 ni I01 como aprobadas sin la revisión independiente.
