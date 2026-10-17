@@ -1,1 +1,1 @@
-"""Test package."""
+"""Backend tests."""
