@@ -169,8 +169,10 @@ personales y la fusión final se registran por separado de esta auditoría técn
 2. Registrar revisiones cruzadas pendientes de A10, B09 y D13. Las revisiones
    técnicas C08/E08 realizadas por Codex constan en sus respectivos informes;
    no atribuir aprobación a personas que no la han dado.
-3. Publicar candidata/solicitud de revisión cuando el acceso remoto lo permita;
-   obtener las dos aprobaciones I10 y solo entonces fusionar a la rama base.
+3. La candidata está publicada en `origin/codex/mvp-final-validation`. La PR
+   sigue pendiente por permisos del conector; su contenido está preparado en
+   `docs/PR_INTEGRACION.md`. Obtener las dos aprobaciones I10 antes de la fusión
+   final, según los controles de `tasks.md`.
 4. Actualizar este registro después de cada corrección de aceptación. No marcar
    el MVP formalmente terminado únicamente por tener suites aprobadas.
 
@@ -179,7 +181,13 @@ personales y la fusión final se registran por separado de esta auditoría técn
 - `npm ci` inicialmente falló por un `esbuild.exe` abierto por Vite. Tras detener
   las dos sesiones de desarrollo propias, instalación, 20 tests y build pasaron.
 - Un intento de reconstruir Docker falló resolviendo `registry-1.docker.io`.
-  El reintento terminó correctamente y se recreó la API con la imagen actualizada.
+  El reintento terminó correctamente. En la actualización final volvió a fallar
+  la resolución de `auth.docker.io`: se reutilizó esa imagen local y se copió el
+  backend actualizado, sin cambiar dependencias. La imagen resultante comienza
+  por `334f40337d50`; la API se recreó con `docker compose up -d --no-build api`
+  y respondió correctamente junto con PostgreSQL. El arranque local está
+  comprobado; la última reconstrucción desde el registro externo quedó limitada
+  por DNS.
   La API se limita a `127.0.0.1:8000` conforme al uso local del MVP.
 - Advertencias de deprecación de React Router y Starlette no hicieron fallar
   las suites. No se presenta este informe como auditoría de dependencias.
