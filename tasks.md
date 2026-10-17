@@ -123,22 +123,22 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 **Rama:** `feature/mvp-pdf-history`. **Propiedad:** `backend/app/documents/` y sus pruebas. Usa una vista previa fija y un doble de almacenamiento hasta integrar P1 y P2. **Revisor:** P4.
 
-- [ ] **E01 · 25 min · Dep.: G02 · RF-02–RF-03, RF-24.** Crear composición de PDF desde una instantánea de ejemplo con cliente, dirección, alcance, calendario, período y totales.
+- [x] **E01 · 25 min · Dep.: G02 · RF-02–RF-03, RF-24.** Crear composición de PDF desde una instantánea de ejemplo con cliente, dirección, alcance, calendario, período y totales.
   **Hecho cuando:** el PDF se abre y el texto extraído contiene los campos comerciales requeridos.
-- [ ] **E02 · 20 min · Dep.: E01 · RF-21, RF-24.** Excluir salarios, costos unitarios internos y margen del documento.
+- [x] **E02 · 20 min · Dep.: E01 · RF-21, RF-24.** Excluir salarios, costos unitarios internos y margen del documento.
   **Hecho cuando:** una prueba de contenido no encuentra esos valores ni etiquetas en el PDF.
-- [ ] **E03 · 25 min · Dep.: A02, E01 · RF-25, RF-34.** Definir instantánea de datos visibles y valores de precio, excluyendo código/fecha de la comparación de equivalencia.
+- [x] **E03 · 25 min · Dep.: A02, E01 · RF-25, RF-34.** Definir instantánea de datos visibles y valores de precio, excluyendo código/fecha de la comparación de equivalencia.
   **Hecho cuando:** dos entradas equivalentes dan la misma identidad y un cambio visible o de precio da otra.
-- [ ] **E04 · 25 min · Dep.: E03 · RF-25–RF-27, RF-34.** Preparar servicio de emisión que conserve PDF e instantánea juntos o no cree versión ante fallo.
+- [x] **E04 · 25 min · Dep.: E03 · RF-25–RF-27, RF-34.** Preparar servicio de emisión que conserve PDF e instantánea juntos o no cree versión ante fallo.
   **Hecho cuando:** pruebas con almacenamiento simulado cubren éxito, fallo de PDF y fallo de persistencia sin versión parcial.
-- [ ] **E05 · 25 min · Dep.: E03–E04 · RF-25, RF-27, RF-34.** Reutilizar versión anterior tras clic repetido o cambios revertidos y crear otra tras cambio relevante.
+- [x] **E05 · 25 min · Dep.: E03–E04 · RF-25, RF-27, RF-34.** Reutilizar versión anterior tras clic repetido o cambios revertidos y crear otra tras cambio relevante.
   **Hecho cuando:** las pruebas conservan código, fecha y PDF del reintento y distinguen una nueva versión válida.
-- [ ] **E06 · 25 min · Dep.: E04 · RF-27–RF-28.** Preparar búsqueda por código/cliente/servicio y descarga del PDF conservado, sin recálculo.
+- [x] **E06 · 25 min · Dep.: E04 · RF-27–RF-28.** Preparar búsqueda por código/cliente/servicio y descarga del PDF conservado, sin recálculo.
   **Hecho cuando:** una versión previa se encuentra y descarga aun si la configuración actual cambió.
-- [ ] **E07 · 25 min · Dep.: E02, E05–E06 · RF-24–RF-28, RF-34.** Probar privacidad del PDF, inmutabilidad, fallos, búsqueda e idempotencia con instantáneas controladas.
+- [x] **E07 · 25 min · Dep.: E02, E05–E06 · RF-24–RF-28, RF-34.** Probar privacidad del PDF, inmutabilidad, fallos, búsqueda e idempotencia con instantáneas controladas.
   **Hecho cuando:** todas las variantes tienen resultado esperado independiente del PDF o versión generados.
-- [ ] **E08 · 20 min · Dep.: E07 · RF-24–RF-28, RF-34.** Ejecutar pruebas de la rama, registrar RF cubiertos y solicitar revisión a P4.
-  **Hecho cuando:** resultados reproducibles y revisión de P4 quedan registrados.
+- [x] **E08 · 20 min · Dep.: E07 · RF-24–RF-28, RF-34.** Ejecutar pruebas de la rama, registrar RF cubiertos y realizar revisión técnica por Codex en sustitución de P4, según instrucción del usuario.
+  **Hecho cuando:** resultados reproducibles y revisión técnica quedan registrados.
 
 ## Integración, pruebas conjuntas y fusión final
 
