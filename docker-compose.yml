@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/cleanexpo
       - GEMINI_API_KEY=${GEMINI_API_KEY}

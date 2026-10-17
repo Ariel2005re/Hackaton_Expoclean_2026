@@ -95,7 +95,7 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 - [ ] **D01 · 20 min · Dep.: G02 · RF-01, RF-22, RF-28.** Preparar aplicación React/TypeScript y navegación entre nueva cotización, borradores, configuración e historial.
   **Hecho cuando:** cada vista abre localmente y la compilación de frontend pasa.
 - [ ] **D02 · 20 min · Dep.: D01, A02 · RF-01–RF-03, RF-22.** Mostrar selección/registro de cliente y formulario de servicio con período y horario.
-  **Hecho cuando:** datos incompletos se pueden conservar visualmente y horarios nocturnos o de duración cero muestran pendiente.
+  **Hecho cuando:** datos incompletos se pueden conservar y horarios con fin no posterior al inicio muestran pendiente; un horario nocturno dentro del mismo día es válido según RF-03.
 - [ ] **D03 · 25 min · Dep.: D02 · RF-04–RF-05, RF-13.** Añadir lista y formulario de grupos con cantidad, superficie física, días semanales, visitas, estado y perfil.
   **Hecho cuando:** se puede crear, editar, separar y quitar grupos sin perder el resto del borrador.
 - [ ] **D04 · 25 min · Dep.: D03 · RF-04, RF-12–RF-13, RF-18–RF-19.** Añadir trabajo general/especializado, superficie especializada y ajuste de personas/horas.
@@ -142,7 +142,16 @@ Derivado de [plan.md](plan.md), [spec.md](specs/001-hackaton/spec.md) y [constit
 
 ## Integración, pruebas conjuntas y fusión final
 
-**Estado observado el 17-10-2026:** `integration/mvp` incorporó las ramas P1,
+**Actualización de aceptación del 17-10-2026:** la candidata
+`codex/mvp-final-validation` reúne P1–P5 y las correcciones de aceptación. La rama
+`integration/mvp` sigue en `d07b94c`; `main` no se ha fusionado. Se verificaron
+151 pruebas backend y 41 subpruebas, instalación PostgreSQL vacía, 20 tests
+frontend, `npm ci` y build. I07 e I08 tienen recorridos reales y PDFs descargados.
+Las aprobaciones cruzadas pendientes mantienen I01/I10 abiertos; no se infieren
+de las suites aprobadas. I09 sigue en auditoría. Detalles, RF y evidencias:
+[docs/ACEPTACION_MVP.md](docs/ACEPTACION_MVP.md).
+
+**Registro anterior al cierre de P4:** `integration/mvp` incorporó las ramas P1,
 P2, P3 y P5 desde `main` 91bde0c. La rama P4 ya contiene archivos iniciales
 de `frontend/`, aún sin integración ni pruebas conjuntas.
 La integración backend tiene contrato actualizado en
@@ -171,9 +180,9 @@ cumplir sus criterios completos.
   **Hecho cuando:** un PDF se persiste y descarga; un fallo simulado no deja versión parcial.
 - [ ] **I06 · 25 min · Dep.: I05 · RF-01–RF-34.** Fusionar P4 y conectar la interfaz a las operaciones integradas.
   **Hecho cuando:** frontend y backend compilan juntos y abren clientes, borradores, propuestas, vista previa e historial.
-- [ ] **I07 · 25 min · Dep.: I06 · RF-01–RF-05, RF-12–RF-28, RF-32–RF-34.** Ejecutar de extremo a extremo el camino manual con PostgreSQL y descarga real del PDF.
+- [x] **I07 · 25 min · Dep.: I06 · RF-01–RF-05, RF-12–RF-28, RF-32–RF-34.** Ejecutar de extremo a extremo el camino manual con PostgreSQL y descarga real del PDF.
   **Hecho cuando:** borrador incompleto bloquea PDF, cotización completa lo descarga y una versión anterior mantiene precio tras cambiar tarifa.
-- [ ] **I08 · 25 min · Dep.: I06 · RF-06–RF-11, RF-29–RF-31.** Ejecutar de extremo a extremo el camino asistido con Gemini simulado y su alternativa manual ante fallo.
+- [x] **I08 · 25 min · Dep.: I06 · RF-06–RF-11, RF-29–RF-31.** Ejecutar de extremo a extremo el camino asistido con Gemini simulado y su alternativa manual ante fallo.
   **Hecho cuando:** evidencia, contradicción y respuesta parcial pasan por revisión humana y el fallo no impide emitir manualmente.
 - [ ] **I09 · 25 min · Dep.: I07–I08 · RF-01–RF-34.** Revisar matriz RF → prueba, PDF de ejemplo y resultados de instalación limpia; asignar defectos a la rama dueña.
   **Hecho cuando:** RF-01–RF-34 tienen evidencia de prueba y no quedan defectos de aceptación sin resolver.

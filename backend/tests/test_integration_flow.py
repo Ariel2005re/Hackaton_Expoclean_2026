@@ -5,6 +5,7 @@ from io import BytesIO
 
 from fastapi.testclient import TestClient
 from pypdf import PdfReader
+import pytest
 
 from backend.app.main import app
 from backend.app.db.database import SessionLocal
@@ -203,6 +204,40 @@ def test_gemini_failure_preserves_text_and_empty_manual_draft():
         assert client.get(f"/cotizaciones/{quote_id}/preview").json()["is_emission_valid"] is True
     finally:
         app.dependency_overrides.clear()
+        _cleanup(quote_id)
+
+
+@pytest.mark.parametrize("failure", ["render", "persist"])
+def test_pdf_failures_leave_no_version_and_keep_draft(monkeypatch, failure):
+    """RF-26/RF-34: HTTP failure rolls back actual PostgreSQL writes."""
+    from backend.app.routers import versiones
+    from backend.app.documents.issuance import EmissionService
+    from backend.app.version_store import PostgresVersionTransaction
+
+    quote_id = f"it-{uuid4().hex}"
+    client = TestClient(app, raise_server_exceptions=False)
+    try:
+        assert client.post("/cotizaciones/", json=_full_draft(quote_id)).status_code == 201
+        before = client.get(f"/cotizaciones/{quote_id}").json()
+        if failure == "render":
+            def fail_render(snapshot):
+                raise RuntimeError("Fallo de generación simulado")
+            monkeypatch.setattr(versiones, "EmissionService",
+                                lambda store: EmissionService(store, render_pdf=fail_render))
+        else:
+            def fail_commit(transaction):
+                transaction.db.flush()  # A real INSERT must be undone, not just an in-memory stage.
+                raise RuntimeError("Fallo de persistencia simulado")
+            monkeypatch.setattr(PostgresVersionTransaction, "commit", fail_commit)
+        assert client.post(f"/cotizaciones/{quote_id}/versiones").status_code == 500
+        assert client.get(f"/cotizaciones/{quote_id}").json() == before
+        with SessionLocal() as db:
+            assert db.query(VersionCotizacion).filter_by(borrador_id=quote_id).count() == 0
+        monkeypatch.undo()
+        retry = client.post(f"/cotizaciones/{quote_id}/versiones")
+        assert retry.status_code == 200, retry.text
+        assert client.get(retry.json()["pdf_url"]).content.startswith(b"%PDF-")
+    finally:
         _cleanup(quote_id)
 
 
