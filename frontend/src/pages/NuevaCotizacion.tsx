@@ -44,6 +44,8 @@ export default function NuevaCotizacion() {
   const [confirmed, setConfirmed] = useState(false);
   const [proposal, setProposal] = useState<Propuesta | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const [correction, setCorrection] = useState<{ groupId: string; name: string; value: string } | null>(null);
+  const [proposalSplit, setProposalSplit] = useState<{ groupId: string; left: string; right: string } | null>(null);
   const [splitting, setSplitting] = useState<Grupo | null>(null);
   const [versions, setVersions] = useState<HistorialItem[]>([]);
   const [latestVersion, setLatestVersion] = useState<Version | null>(null);
@@ -55,6 +57,8 @@ export default function NuevaCotizacion() {
     setConfirmed(false);
     setProposal(null);
     setSelected([]);
+    setCorrection(null);
+    setProposalSplit(null);
     setPreview(null);
     setLatestVersion(null);
     setVersions([]);
@@ -706,25 +710,26 @@ export default function NuevaCotizacion() {
                           <button
                             type="button"
                             onClick={() => {
-                              const value = window.prompt(
-                                `Corregir ${name}`,
-                                pretty(attr.value),
-                              );
-                              if (value !== null) {
-                                try {
-                                  void review("corregir", {
-                                    group_id: group.id,
-                                    attribute_name: name,
-                                    new_value: parseCorrection(name, value),
-                                  });
-                                } catch (e) {
-                                  setNotice(message(e));
-                                }
-                              }
+                              setCorrection({ groupId: group.id, name, value: attr.value == null ? "" : pretty(attr.value) });
                             }}
                           >
                             Corregir
                           </button>
+                          {correction?.groupId === group.id && correction.name === name && (
+                            <div>
+                              <label>Nuevo valor de {name}
+                                <input autoFocus value={correction.value} onChange={(e) => setCorrection({ ...correction, value: e.target.value })} />
+                              </label>
+                              <button type="button" onClick={() => {
+                                try {
+                                  const new_value = parseCorrection(name, correction.value);
+                                  void review("corregir", { group_id: group.id, attribute_name: name, new_value });
+                                  setCorrection(null);
+                                } catch (e) { setNotice(message(e)); }
+                              }}>Aplicar corrección</button>
+                              <button type="button" onClick={() => setCorrection(null)}>Cancelar corrección</button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -746,13 +751,7 @@ export default function NuevaCotizacion() {
                   <button
                     type="button"
                     onClick={() => {
-                      const left = window.prompt("Cantidad del primer grupo");
-                      const right = window.prompt("Cantidad del segundo grupo");
-                      if (left && right)
-                        void review("separar", {
-                          group_id: group.id,
-                          split_quantities: [Number(left), Number(right)],
-                        });
+                      setProposalSplit({ groupId: group.id, left: "", right: "" });
                     }}
                   >
                     Separar
@@ -766,6 +765,27 @@ export default function NuevaCotizacion() {
                     Descartar
                   </button>
                 </div>
+                {proposalSplit?.groupId === group.id && (
+                  <fieldset>
+                    <legend>Separar propuesta</legend>
+                    <label>Cantidad del primer grupo
+                      <input inputMode="numeric" value={proposalSplit.left} onChange={(e) => setProposalSplit({ ...proposalSplit, left: e.target.value })} />
+                    </label>
+                    <label>Cantidad del segundo grupo
+                      <input inputMode="numeric" value={proposalSplit.right} onChange={(e) => setProposalSplit({ ...proposalSplit, right: e.target.value })} />
+                    </label>
+                    <button type="button" onClick={() => {
+                      const quantities = [Number(proposalSplit.left), Number(proposalSplit.right)];
+                      if (quantities.some((value) => !Number.isInteger(value) || value <= 0)) {
+                        setNotice("Las dos cantidades deben ser enteros positivos.");
+                        return;
+                      }
+                      void review("separar", { group_id: group.id, split_quantities: quantities });
+                      setProposalSplit(null);
+                    }}>Aplicar separación de propuesta</button>
+                    <button type="button" onClick={() => setProposalSplit(null)}>Cancelar separación de propuesta</button>
+                  </fieldset>
+                )}
               </div>
             ))}
             <button

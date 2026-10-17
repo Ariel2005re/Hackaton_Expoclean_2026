@@ -292,7 +292,6 @@ describe("flujo asistido D12", () => {
     const review = vi
       .spyOn(api, "review")
       .mockResolvedValue({ review: result.review, draft });
-    vi.spyOn(window, "prompt").mockReturnValue("25");
     openPage();
     await screen.findByText("Editar cotización");
     fireEvent.change(screen.getByLabelText("Texto exacto"), {
@@ -305,6 +304,12 @@ describe("flujo asistido D12", () => {
     await screen.findByText(/SUCCESS: Revise la propuesta/);
     expect(screen.queryByText("Grupo: Oficinas")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Corregir" }));
+    fireEvent.change(screen.getByLabelText("Nuevo valor de unit_area_m2"), { target: { value: "25" } });
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar corrección" }));
+    expect(review).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Corregir" }));
+    fireEvent.change(screen.getByLabelText("Nuevo valor de unit_area_m2"), { target: { value: "25" } });
+    fireEvent.click(screen.getByRole("button", { name: "Aplicar corrección" }));
     await waitFor(() =>
       expect(review).toHaveBeenCalledWith("q1", 4, "corregir", {
         group_id: "p1",
