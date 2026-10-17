@@ -61,7 +61,7 @@ export default function PreviewDetails({ preview, groupNames = {} }: { preview: 
                   specialized = obj(group.specialized);
                 const detail = (work: Record<string, unknown>) =>
                   Object.keys(work).length
-                    ? `${label(work.surface_sqm)} m² · ${label(work.total_hours_per_intervention)} h por intervención · ${Number(work.total_hours_per_intervention) * Number(obj(calendar.group_interventions)[id] ?? 0)} h en el período · ${label(work.assigned_workers)} personas · ${label(work.duration_hours)} h de duración`
+                    ? `${label(work.surface_sqm)} m² · ${label(work.total_hours_per_intervention)} h por intervención · ${Number(work.total_hours_per_intervention) * Number(obj(calendar.group_interventions)[id] ?? 0)} h en el período · ${label(work.assigned_workers)} personas · ${label(work.duration_hours)} h de duración${work.estimated_base_hours == null ? "" : ` · Base estimada: ${label(work.estimated_base_hours)} h por intervención`}${work.suggested_workers == null ? "" : ` · Sugerencia para todas las visitas del día: ${label(work.suggested_workers)} personas. Ajuste la dotación en el grupo si corresponde.`}`
                     : "No incluido";
                 return (
                   <tr key={id}>
